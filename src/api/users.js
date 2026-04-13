@@ -47,3 +47,11 @@ export async function getUserById(id) {
     throw new Error(error.response?.data?.message || error.message);
   }
 }
+
+export async function savePlayerID(playerId) {
+  try {
+    return await axiosClient.put('/user/player-id', { playerId });
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}

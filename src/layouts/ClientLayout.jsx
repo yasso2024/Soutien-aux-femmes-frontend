@@ -21,14 +21,17 @@ const PINK = "#f7078b";
 
 const menuConfig = {
   ADMINISTRATEUR: [
-    { key: "/admin/dashboard", label: "Dashboard", icon: "📊" },
+    { key: "/admin/dashboard", label: "Home", icon: "📊" },
     { key: "/admin/utilisateurs", label: "Utilisateurs", icon: "👥" },
     { key: "/admin/demandes", label: "Demandes", icon: "📋" },
+    { key: "/admin/propositions-aide", label: "Propositions", icon: "💝" },
+    { key: "/admin/dons", label: "Dons", icon: "💰" },
+    { key: "/admin/affectations", label: "Affectations", icon: "📌" },
     { key: "/notifications", label: "Notifications", icon: "🔔" },
     { key: "/profile", label: "Profil", icon: "👤" },
   ],
   "FEMME MALADE": [
-    { key: "/femme/dashboard", label: "Dashboard", icon: "🏠" },
+    { key: "/femme/dashboard", label: "Home", icon: "🏠" },
     { key: "/femme/demandes", label: "Mes demandes", icon: "📋" },
     { key: "/femme/add-demande", label: "Ajouter demande", icon: "➕" },
     { key: "/femme/propositions", label: "Propositions", icon: "💝" },
@@ -36,20 +39,20 @@ const menuConfig = {
     { key: "/profile", label: "Profil", icon: "👤" },
   ],
   ASSOCIATION: [
-    { key: "/association/dashboard", label: "Dashboard", icon: "🏠" },
+    { key: "/association/dashboard", label: "Home", icon: "🏠" },
     { key: "/association/actions-solidaires", label: "Actions solidaires", icon: "🤝" },
     { key: "/association/propositions-aide", label: "Propositions aide", icon: "💝" },
     { key: "/notifications", label: "Notifications", icon: "🔔" },
     { key: "/profile", label: "Profil", icon: "👤" },
   ],
   BENEVOLE: [
-    { key: "/benevole/dashboard", label: "Dashboard", icon: "🏠" },
+    { key: "/benevole/dashboard", label: "Home", icon: "🏠" },
     { key: "/benevole/affectations", label: "Affectations", icon: "📅" },
     { key: "/notifications", label: "Notifications", icon: "🔔" },
     { key: "/profile", label: "Profil", icon: "👤" },
   ],
   DONTEUR: [
-    { key: "/donateur/dashboard", label: "Dashboard", icon: "🏠" },
+    { key: "/donateur/dashboard", label: "Home", icon: "🏠" },
     { key: "/donateur/dons", label: "Mes dons", icon: "💰" },
     { key: "/donateur/add-don", label: "Ajouter don", icon: "➕" },
     { key: "/donateur/demandes-financees", label: "Demandes financées", icon: "✅" },
@@ -57,7 +60,7 @@ const menuConfig = {
     { key: "/profile", label: "Profil", icon: "👤" },
   ],
   DONATEUR: [
-    { key: "/donateur/dashboard", label: "Dashboard", icon: "🏠" },
+    { key: "/donateur/dashboard", label: "Home", icon: "🏠" },
     { key: "/donateur/dons", label: "Mes dons", icon: "💰" },
     { key: "/donateur/add-don", label: "Ajouter don", icon: "➕" },
     { key: "/donateur/demandes-financees", label: "Demandes financées", icon: "✅" },

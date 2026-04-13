@@ -82,6 +82,10 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={["ADMINISTRATEUR"]} />}>
               <Route element={<ClientLayout />}>
                 <Route path="/admin/dashboard" element={<AdminDashboard />} />
+                <Route path="/admin/demandes" element={<AdminDashboard />} />
+                <Route path="/admin/propositions-aide" element={<AdminDashboard />} />
+                <Route path="/admin/dons" element={<AdminDashboard />} />
+                <Route path="/admin/affectations" element={<AdminDashboard />} />
                 <Route path="/admin/utilisateurs" element={<AdminUtilisateurs />} />
               </Route>
             </Route>

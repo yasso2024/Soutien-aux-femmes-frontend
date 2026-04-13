@@ -1,6 +1,7 @@
 import { App, Button, DatePicker, Divider, Form, Input } from "antd";
 import { createActionSolidaire } from "../../api/actionSolidaires";
 import { useNavigate } from "react-router-dom";
+import dayjs from "dayjs";
 
 const AddActionSolidaire = () => {
   const navigate = useNavigate();
@@ -54,7 +55,13 @@ const AddActionSolidaire = () => {
           name="dateAction"
           rules={[{ required: true, message: "Date obligatoire" }]}
         >
-          <DatePicker style={{ width: "100%" }} format="DD/MM/YYYY" />
+          <DatePicker
+            style={{ width: "100%" }}
+            format="DD/MM/YYYY"
+            disabledDate={(current) =>
+              current && current.startOf("day").isBefore(dayjs().startOf("day"))
+            }
+          />
         </Form.Item>
 
         <Button type="primary" htmlType="submit">

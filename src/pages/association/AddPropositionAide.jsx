@@ -46,7 +46,17 @@ function AddPropositionAide() {
           name="demande"
           rules={[{ required: true, message: "Demande obligatoire" }]}
         >
-          <Select placeholder="Choisir une demande">
+          <Select
+            showSearch
+            allowClear
+            placeholder="Écrire ou choisir une demande"
+            optionFilterProp="children"
+            filterOption={(input, option) =>
+              String(option?.children || "")
+                .toLowerCase()
+                .includes(input.toLowerCase())
+            }
+          >
             {demandes.map((d) => (
               <Select.Option key={d._id} value={d._id}>
                 {d.titre || d._id}

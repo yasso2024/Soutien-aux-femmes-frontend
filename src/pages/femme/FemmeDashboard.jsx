@@ -142,6 +142,8 @@ const STATUS_COLOR_MAP = {
   REFUSEE: "#ef4444",
   EN_COURS: "#3b82f6",
   TERMINEE: "#0ea5e9",
+  PROPOSEE: "#f59e0b",
+  ACCEPTEE: "#22c55e",
 };
 
 export default function FemmeDashboard() {
@@ -282,6 +284,9 @@ export default function FemmeDashboard() {
     ? new Date(user.createdAt).toLocaleDateString("fr-FR", { month: "long", year: "numeric" })
     : "mars 2025";
   const userRegion = user?.region || "Tunisie";
+  const diagnosticDate = user?.dateDiagnostic
+    ? new Date(user.dateDiagnostic).toLocaleDateString("fr-FR")
+    : "Non renseignée";
 
   return (
     <>
@@ -303,6 +308,7 @@ export default function FemmeDashboard() {
               <span style={styles.heroGreeting}>{greeting},</span>
               <h2 style={styles.heroName}>{user?.firstName || "Fatima"} {user?.lastName || ""}</h2>
               <p style={styles.heroSub}>Membre depuis {memberSince} · Région {userRegion}</p>
+              <p style={styles.heroSub}>Date de diagnostic : {diagnosticDate}</p>
             </div>
           </div>
           <div style={styles.heroBtns}>

@@ -17,7 +17,7 @@ const Profile = () => {
 
   return (
     <div>
-      <h4>My Profile</h4>
+      <h4>Mon profil</h4>
       <Divider />
 
       <Card style={{ maxWidth: 600 }}>
@@ -55,25 +55,25 @@ const Profile = () => {
             {user?.email || "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="First Name">
+          <Descriptions.Item label="Prénom">
             {user?.firstName || "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Last Name">
+          <Descriptions.Item label="Nom">
             {user?.lastName || "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Date of Birth">
+          <Descriptions.Item label="Date de naissance">
             {user?.dob ? new Date(user.dob).toLocaleDateString("fr-FR") : "-"}
           </Descriptions.Item>
 
-          <Descriptions.Item label="Role">
+          <Descriptions.Item label="Rôle">
             <Tag color={ROLE_COLORS[user?.role] || "default"}>
               {user?.role || "-"}
             </Tag>
           </Descriptions.Item>
 
-          <Descriptions.Item label="Creation Date">
+          <Descriptions.Item label="Date de création">
             {user?.createdAt
               ? new Date(user.createdAt).toLocaleDateString("fr-FR")
               : "-"}
@@ -82,7 +82,7 @@ const Profile = () => {
 
         <div style={{ marginTop: 16 }}>
           <Link to="/change-password">
-            <Button icon={<LockOutlined />}>Change Password</Button>
+            <Button icon={<LockOutlined />}>Changer le mot de passe</Button>
           </Link>
         </div>
       </Card>

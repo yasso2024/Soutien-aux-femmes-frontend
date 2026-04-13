@@ -185,7 +185,11 @@ export default function DonateurDashboard() {
         .map((d) => (d?.demande?._id || d?.demande || "").toString())
         .filter(Boolean)
     ).size;
-    const femmesAidees = demandesFinancees;
+    const femmesAidees = new Set(
+      dons
+        .map((d) => (d?.demande?.femme?._id || d?.demande?.femme || "").toString())
+        .filter(Boolean)
+    ).size;
     const propositionsRecues = propositionsLiees.length;
 
     let rang = "Bronze";
@@ -268,6 +272,10 @@ export default function DonateurDashboard() {
               <p style={styles.heroSub}>Bienvenue,</p>
               <h2 style={styles.heroName}>{user?.firstName || "Ahmed"} {user?.lastName || ""}</h2>
               <span style={styles.heroBadge}>Donateur {stats.rang} · {formatAmount(stats.totalMontant)} TND donnés</span>
+              <p style={{ margin: "10px 0 0", fontSize: 13, color: "rgba(255,255,255,0.85)" }}>
+                Acteur financier ou matériel, vous faites des dons, financez les demandes
+                et aidez indirectement les bénéficiaires.
+              </p>
             </div>
           </div>
           <button className="d-hero-btn" style={styles.heroBtn} onClick={() => navigate("/donateur/add-don")}>
@@ -336,7 +344,7 @@ export default function DonateurDashboard() {
             <div style={styles.impactPanel}>
               <div style={styles.trophyCircle}>🏆</div>
               <div style={styles.impactTitle}>Donateur {stats.rang}</div>
-              <div style={styles.impactSub}>Objectif mensuel</div>
+              <div style={styles.impactSub}>Soutenir les demandes et amplifier votre impact</div>
               {stats.impact.map((item, i) => (
                 <div key={i}>
                   <div style={styles.progressLabel}>

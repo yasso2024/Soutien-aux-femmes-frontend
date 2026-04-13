@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Card, Table, Typography, Tag, message, Empty, Spin } from "antd";
 import { listDons } from "../../api/dons";
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 
 const DonsList = () => {
   const [loading, setLoading] = useState(true);
@@ -61,6 +61,10 @@ const DonsList = () => {
   return (
     <Card>
       <Title level={4}>Mes dons</Title>
+      <Paragraph type="secondary" style={{ marginTop: -8 }}>
+        Acteur financier ou matériel, vous soutenez les demandes, financez les besoins
+        et aidez indirectement les bénéficiaires.
+      </Paragraph>
 
       {loading ? (
         <div style={{ textAlign: "center", padding: 40 }}>

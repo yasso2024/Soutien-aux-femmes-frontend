@@ -27,7 +27,17 @@ export default function AdminUtilisateurs() {
 
   useEffect(() => {
     listUsers()
-      .then((res) => setUsers(res.data?.data || res.data || []))
+      .then((res) => {
+        const data = Array.isArray(res?.data?.users)
+          ? res.data.users
+          : Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+
+        setUsers(data);
+      })
       .catch(() => message.error("Impossible de charger les utilisateurs"))
       .finally(() => setLoading(false));
   }, []);

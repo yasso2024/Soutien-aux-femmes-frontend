@@ -34,3 +34,11 @@ export async function updateDon(id, values) {
 export async function confirmerDon(id) {
   return axiosClient.patch(`/dons/${id}/confirm`, {});
 }
+
+export async function changeDonStatus(id, statut) {
+  try {
+    return await axiosClient.put(`/dons/${id}/statut`, { statut });
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
