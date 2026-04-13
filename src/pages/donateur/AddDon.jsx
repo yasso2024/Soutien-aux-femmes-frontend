@@ -12,7 +12,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { createDon } from "../../api/dons";
 
-const { Title } = Typography;
+const { Title, Paragraph } = Typography;
 
 const AddDon = () => {
   const [form] = Form.useForm();
@@ -36,6 +36,10 @@ const AddDon = () => {
   return (
     <Card style={{ maxWidth: 700, margin: "0 auto", borderRadius: 16 }}>
       <Title level={3}>Ajouter un don</Title>
+      <Paragraph type="secondary" style={{ marginTop: -6 }}>
+        Faites un don financier ou matériel pour soutenir une demande et aider
+        indirectement les bénéficiaires.
+      </Paragraph>
 
       <Form form={form} layout="vertical" onFinish={handleSubmit}>
         <Form.Item

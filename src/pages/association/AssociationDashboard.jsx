@@ -176,10 +176,21 @@ const styles = {
 };
 
 const statutColorMap = {
-  PLANIFIEE: "#3b82f6",
-  EN_COURS: "#f59e0b",
+  EN_ATTENTE: "#f59e0b",
   TERMINEE: "#22c55e",
 };
+
+function getActionStatus(action) {
+  if (!action?.dateAction) return "EN_ATTENTE";
+
+  const actionDate = new Date(action.dateAction);
+  if (Number.isNaN(actionDate.getTime())) return "EN_ATTENTE";
+
+  const endOfActionDay = new Date(actionDate);
+  endOfActionDay.setHours(23, 59, 59, 999);
+
+  return endOfActionDay < new Date() ? "TERMINEE" : "EN_ATTENTE";
+}
 
 const propositionColorMap = {
   PROPOSEE: "#f59e0b",
@@ -238,13 +249,13 @@ export default function AssociationDashboard() {
   const stats = useMemo(() => {
     const totalActions = actions.length;
     const totalPropositions = propositions.length;
-    const actionsPlanifiees = actions.filter((a) => a?.statut === "PLANIFIEE").length;
-    const actionsTerminees = actions.filter((a) => a?.statut === "TERMINEE").length;
+    const actionsEnAttente = actions.filter((a) => getActionStatus(a) === "EN_ATTENTE").length;
+    const actionsTerminees = actions.filter((a) => getActionStatus(a) === "TERMINEE").length;
 
     return [
       { label: "Actions solidaires", value: totalActions, icon: "📅", color: TEAL },
       { label: "Propositions d'aide", value: totalPropositions, icon: "✅", color: "#EC7FA7" },
-      { label: "Actions planifiées", value: actionsPlanifiees, icon: "🕒", color: "#3b82f6" },
+      { label: "Actions en attente", value: actionsEnAttente, icon: "🕒", color: "#f59e0b" },
       { label: "Actions terminées", value: actionsTerminees, icon: "✔️", color: "#22c55e" },
     ];
   }, [actions, propositions]);
@@ -349,7 +360,7 @@ export default function AssociationDashboard() {
                     </div>
                   ) : (
                     recentActions.map((a, i) => {
-                      const statut = a?.statut || "PLANIFIEE";
+                      const statut = getActionStatus(a);
                       const pillColor = statutColorMap[statut] || "#64748b";
                       const participants = a?.benevoles?.length || 0;
 

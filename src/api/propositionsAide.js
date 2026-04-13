@@ -27,6 +27,15 @@ export async function updatePropositionAide(id, values) {
   }
 }
 
+export async function changePropositionAideStatus(id, statut) {
+  try {
+    const response = await axiosClient.put(`/propositions-aide/${id}/statut`, { statut });
+    return response;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
+
 export async function deletePropositionAide(id) {
   try {
     const response = await axiosClient.delete(`/propositions-aide/${id}`);

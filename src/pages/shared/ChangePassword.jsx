@@ -21,7 +21,7 @@ const ChangePassword = () => {
 
   return (
     <div>
-      <h4>Change Password</h4>
+      <h4>Changer le mot de passe</h4>
       <Divider />
 
       <Form
@@ -32,50 +32,50 @@ const ChangePassword = () => {
       >
         <Form.Item
           name="currentPassword"
-          label="Current Password"
+          label="Mot de passe actuel"
           rules={[
-            { required: true, message: "Please enter your current password" },
-            { min: 8, message: "Password must be 8 chars minimum" },
-            { max: 32, message: "Password must be 32 chars max" },
+            { required: true, message: "Veuillez saisir votre mot de passe actuel" },
+            { min: 8, message: "Le mot de passe doit contenir au moins 8 caractères" },
+            { max: 32, message: "Le mot de passe doit contenir au maximum 32 caractères" },
           ]}
         >
-          <Input.Password placeholder="Current password" />
+          <Input.Password placeholder="Mot de passe actuel" />
         </Form.Item>
 
         <Form.Item
           name="newPassword"
-          label="New Password"
+          label="Nouveau mot de passe"
           rules={[
-            { required: true, message: "Please enter your new password" },
-            { min: 8, message: "Password must be 8 chars minimum" },
-            { max: 32, message: "Password must be 32 chars max" },
+            { required: true, message: "Veuillez saisir votre nouveau mot de passe" },
+            { min: 8, message: "Le mot de passe doit contenir au moins 8 caractères" },
+            { max: 32, message: "Le mot de passe doit contenir au maximum 32 caractères" },
           ]}
         >
-          <Input.Password placeholder="New password" />
+          <Input.Password placeholder="Nouveau mot de passe" />
         </Form.Item>
 
         <Form.Item
           name="confirmNewPassword"
-          label="Confirm New Password"
+          label="Confirmer le nouveau mot de passe"
           dependencies={["newPassword"]}
           rules={[
-            { required: true, message: "Please confirm your new password" },
+            { required: true, message: "Veuillez confirmer votre nouveau mot de passe" },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("newPassword") === value) {
                   return Promise.resolve();
                 }
-                return Promise.reject(new Error("Passwords do not match"));
+                return Promise.reject(new Error("Les mots de passe ne correspondent pas"));
               },
             }),
           ]}
         >
-          <Input.Password placeholder="Confirm new password" />
+          <Input.Password placeholder="Confirmer le nouveau mot de passe" />
         </Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit">
-            Change Password
+            Changer le mot de passe
           </Button>
         </Form.Item>
       </Form>

@@ -10,6 +10,11 @@ import { CheckOutlined, CloseOutlined, SearchOutlined, FileTextOutlined } from "
 
 const { Title, Text } = Typography;
 const PURPLE = "#8B5CF6";
+const STATUT_LABELS = {
+  EN_ATTENTE: "En attente",
+  ACCEPTEE: "Acceptée",
+  TERMINEE: "Terminée",
+};
 
 const AffectationsList = () => {
   const { message } = AntApp.useApp();
@@ -63,6 +68,8 @@ const AffectationsList = () => {
       a.benevole?.firstName?.toLowerCase().includes(q) ||
       a.benevole?.lastName?.toLowerCase().includes(q) ||
       a.action?.titre?.toLowerCase().includes(q) ||
+      a.demande?.titre?.toLowerCase().includes(q) ||
+      a.demande?.description?.toLowerCase().includes(q) ||
       a.statut?.toLowerCase().includes(q)
     );
   });
@@ -103,11 +110,30 @@ const AffectationsList = () => {
               {record.action.titre}
             </Text>
             <Text type="secondary" style={{ fontSize: 11 }}>
-              {new Date(record.action.dateDebut).toLocaleDateString("fr-FR")}
+              {record.action.dateAction
+                ? new Date(record.action.dateAction).toLocaleDateString("fr-FR")
+                : "-"}
             </Text>
           </div>
         ) : (
           <Text type="secondary">—</Text>
+        ),
+    },
+    {
+      title: "Demande d'aide",
+      key: "demande",
+      render: (_, record) =>
+        record.demande ? (
+          <div>
+            <Text strong style={{ display: "block", fontSize: 13 }}>
+              {record.demande.titre || "Demande d'aide"}
+            </Text>
+            <Text type="secondary" style={{ fontSize: 11 }}>
+              {record.demande.type || "Type non précisé"}
+            </Text>
+          </div>
+        ) : (
+          <Text type="secondary">Aucune demande liée</Text>
         ),
     },
     {
@@ -131,7 +157,7 @@ const AffectationsList = () => {
         };
         return (
           <Tag color={colorMap[statut] || "default"} style={{ borderRadius: 6 }}>
-            {statut || "-"}
+            {STATUT_LABELS[statut] || statut || "-"}
           </Tag>
         );
       },
@@ -141,7 +167,8 @@ const AffectationsList = () => {
       key: "actions",
       render: (_, record) => (
         <Space size={6}>
-          {user?.role === "ADMINISTRATEUR" && record.statut === "EN_ATTENTE" && (
+          {(user?.role === "ADMINISTRATEUR" || user?.role === "BENEVOLE") &&
+            record.statut === "EN_ATTENTE" && (
             <Popconfirm
               title="Confirmer cette participation ?"
               onConfirm={() => handleConfirmer(record._id)}
@@ -204,7 +231,7 @@ const AffectationsList = () => {
             Mes affectations
           </Title>
           <Text style={{ color: "rgba(255,255,255,0.8)", fontSize: 13 }}>
-            {affectations.length} affectation{affectations.length !== 1 ? "s" : ""}
+            {affectations.length} affectation{affectations.length !== 1 ? "s" : ""} pour suivre mes demandes d'aide et missions terrain
           </Text>
         </div>
       </div>
@@ -216,7 +243,7 @@ const AffectationsList = () => {
         <div style={{ padding: "16px 20px", borderBottom: "1px solid #f0f0f0" }}>
           <Input
             prefix={<SearchOutlined style={{ color: "#aaa" }} />}
-            placeholder="Rechercher par nom, action ou statut…"
+            placeholder="Rechercher par nom, action, demande ou statut…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             style={{ maxWidth: 420, borderRadius: 8 }}

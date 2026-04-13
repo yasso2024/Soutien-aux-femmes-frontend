@@ -12,10 +12,26 @@ const TEAL_LIGHT = "#E1F5EE";
 const TEAL_DARK = "#085041";
 
 const statutConfig = {
-  PLANIFIEE: { label: "Planifiée", bg: "#EEF2FF", color: "#3730A3", dot: "#6366F1" },
-  EN_COURS: { label: "En cours", bg: "#FFF7ED", color: "#92400E", dot: "#F59E0B" },
+  EN_ATTENTE: { label: "En attente", bg: "#FFF7ED", color: "#92400E", dot: "#F59E0B" },
   TERMINEE: { label: "Terminée", bg: "#F0FDF4", color: "#14532D", dot: "#22C55E" },
 };
+
+function getActionStatus(action) {
+  if (!action?.dateAction) {
+    return "EN_ATTENTE";
+  }
+
+  const actionDate = new Date(action.dateAction);
+
+  if (Number.isNaN(actionDate.getTime())) {
+    return "EN_ATTENTE";
+  }
+
+  const endOfActionDay = new Date(actionDate);
+  endOfActionDay.setHours(23, 59, 59, 999);
+
+  return endOfActionDay < new Date() ? "TERMINEE" : "EN_ATTENTE";
+}
 
 const styles = {
   page: {
@@ -252,11 +268,10 @@ const styles = {
   },
 };
 
-const FILTERS = ["Toutes", "PLANIFIEE", "EN_COURS", "TERMINEE"];
+const FILTERS = ["Toutes", "EN_ATTENTE", "TERMINEE"];
 const FILTER_LABELS = {
   Toutes: "Toutes",
-  PLANIFIEE: "Planifiées",
-  EN_COURS: "En cours",
+  EN_ATTENTE: "En attente",
   TERMINEE: "Terminées",
 };
 
@@ -337,7 +352,8 @@ function ConfirmDialog({ message: msg, onConfirm, onCancel }) {
 function ActionCard({ item, user, onParticiper, onDelete }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hover, setHover] = useState(false);
-  const cfg = statutConfig[item.statut] || statutConfig.PLANIFIEE;
+  const statut = getActionStatus(item);
+  const cfg = statutConfig[statut] || statutConfig.EN_ATTENTE;
 
   const dateStr = item.dateAction
     ? new Date(item.dateAction).toLocaleDateString("fr-FR", {
@@ -364,12 +380,12 @@ function ActionCard({ item, user, onParticiper, onDelete }) {
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      <div style={styles.cardAccent(item.statut)} />
+      <div style={styles.cardAccent(statut)} />
       <div style={styles.cardBody}>
         <div style={styles.cardTop}>
           <h3 style={styles.cardTitle}>{item.titre}</h3>
-          <span style={styles.statut(item.statut)}>
-            <span style={styles.statutDot(item.statut)} />
+          <span style={styles.statut(statut)}>
+            <span style={styles.statutDot(statut)} />
             {cfg.label}
           </span>
         </div>
@@ -414,7 +430,7 @@ function ActionCard({ item, user, onParticiper, onDelete }) {
         </div>
 
         <div style={styles.actionBtns}>
-          {user?.role === "BENEVOLE" && (
+          {user?.role === "BENEVOLE" && statut === "EN_ATTENTE" && (
             <button style={styles.participerBtn} onClick={() => onParticiper(item._id)}>
               Participer
             </button>
@@ -500,7 +516,9 @@ const ActionsSolidairesList = () => {
   };
 
   const filtered =
-    filter === "Toutes" ? actions : actions.filter((a) => a.statut === filter);
+    filter === "Toutes"
+      ? actions
+      : actions.filter((action) => getActionStatus(action) === filter);
 
   return (
     <div style={styles.page}>
@@ -535,7 +553,7 @@ const ActionsSolidairesList = () => {
             {FILTER_LABELS[f]}
             {f !== "Toutes" && (
               <span style={{ marginLeft: 5, opacity: 0.7 }}>
-                ({actions.filter((a) => a.statut === f).length})
+                ({actions.filter((action) => getActionStatus(action) === f).length})
               </span>
             )}
           </button>

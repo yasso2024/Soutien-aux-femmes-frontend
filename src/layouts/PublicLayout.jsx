@@ -10,6 +10,24 @@ const { Content, Footer } = Layout;
 const PINK = "#e91e63";
 const PINK_DARK = "#c2185b";
 
+const roleLabels = {
+  ADMINISTRATEUR: "Administrateur",
+  "FEMME MALADE": "Femme malade",
+  ASSOCIATION: "Association",
+  BENEVOLE: "Bénévole",
+  DONTEUR: "Donateur",
+  DONATEUR: "Donateur",
+};
+
+const roleColors = {
+  ADMINISTRATEUR: "#ef4444",
+  "FEMME MALADE": PINK,
+  ASSOCIATION: "#0f9488",
+  BENEVOLE: "#8b5cf6",
+  DONTEUR: "#f59e0b",
+  DONATEUR: "#f59e0b",
+};
+
 const navItems = [
   { key: "/", label: <Link to="/">Accueil</Link> },
   { key: "/traitements", label: <Link to="/traitements">Traitements</Link> },
@@ -20,8 +38,12 @@ const navItems = [
 const PublicLayout = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const [scrolled, setScrolled] = useState(false);
+
+  const currentRole = user?.role;
+  const currentRoleLabel = roleLabels[currentRole] || currentRole || "Utilisateur";
+  const currentRoleColor = roleColors[currentRole] || PINK;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -95,20 +117,46 @@ const PublicLayout = () => {
 
         <div style={{ flexShrink: 0, display: "flex", gap: 10 }}>
           {token ? (
-            <Button
-              type="primary"
-              onClick={() => navigate("/redirect-by-role")}
+            <div
               style={{
-                background: `linear-gradient(135deg, ${PINK}, ${PINK_DARK})`,
-                border: "none",
-                borderRadius: 10,
-                fontWeight: 600,
-                height: 40,
-                boxShadow: "0 4px 14px rgba(233,30,99,0.35)",
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
               }}
             >
-              Tableau de bord
-            </Button>
+              <Button
+                type="primary"
+                onClick={() => navigate("/redirect-by-role")}
+                style={{
+                  background: `linear-gradient(135deg, ${PINK}, ${PINK_DARK})`,
+                  border: "none",
+                  borderRadius: 10,
+                  fontWeight: 600,
+                  height: 40,
+                  boxShadow: "0 4px 14px rgba(233,30,99,0.35)",
+                }}
+              >
+                Tableau de bord
+              </Button>
+
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  height: 40,
+                  padding: "0 14px",
+                  borderRadius: 999,
+                  background: `${currentRoleColor}12`,
+                  border: `1px solid ${currentRoleColor}33`,
+                  color: currentRoleColor,
+                  fontWeight: 700,
+                  fontSize: 13,
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Connecté : {currentRoleLabel}
+              </div>
+            </div>
           ) : (
             <>
               <Button

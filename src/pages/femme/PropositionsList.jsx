@@ -1,20 +1,23 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Avatar, message } from 'antd';
+import { UserOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../contexts/AuthContext';
-import { listPropositionsAide, deletePropositionAide } from '../../api/propositionsAide';
+import { changePropositionAideStatus, listPropositionsAide, deletePropositionAide } from '../../api/propositionsAide';
+import { listDemandes } from '../../api/demandes';
 
 const TEAL = '#0F9488';
 const TEAL_LIGHT = '#E1F5EE';
 const TEAL_DARK = '#085041';
 
 const statutConfig = {
-  EN_ATTENTE: { label: 'En attente', bg: '#FFF7ED', color: '#92400E', dot: '#F59E0B' },
-  ACCEPTEE:   { label: 'Acceptée',   bg: '#F0FDF4', color: '#14532D', dot: '#22C55E' },
-  REFUSEE:    { label: 'Refusée',    bg: '#FEF2F2', color: '#991B1B', dot: '#EF4444' },
+  PROPOSEE: { label: 'Proposée', bg: '#FFF7ED', color: '#92400E', dot: '#F59E0B' },
+  ACCEPTEE: { label: 'Acceptée', bg: '#F0FDF4', color: '#14532D', dot: '#22C55E' },
+  REFUSEE: { label: 'Refusée', bg: '#FEF2F2', color: '#991B1B', dot: '#EF4444' },
 };
 
-const FILTERS = ['Toutes', 'EN_ATTENTE', 'ACCEPTEE', 'REFUSEE'];
-const FILTER_LABELS = { Toutes: 'Toutes', EN_ATTENTE: 'En attente', ACCEPTEE: 'Acceptées', REFUSEE: 'Refusées' };
+const FILTERS = ['Toutes', 'PROPOSEE', 'ACCEPTEE', 'REFUSEE'];
+const FILTER_LABELS = { Toutes: 'Toutes', PROPOSEE: 'Proposées', ACCEPTEE: 'Acceptées', REFUSEE: 'Refusées' };
 
 const styles = {
   page: {
@@ -154,10 +157,42 @@ const styles = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 12,
   },
-  femmeInfo: {},
+  personInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    minWidth: 0,
+  },
   femmeLabel: { fontSize: 12, color: '#94a3b8' },
   femmeName: { fontSize: 13, fontWeight: 600, color: '#334155' },
+  actionRow: {
+    display: 'flex',
+    gap: 8,
+    flexWrap: 'wrap',
+    justifyContent: 'flex-end',
+  },
+  acceptBtn: {
+    padding: '6px 14px',
+    borderRadius: 8,
+    background: '#F0FDF4',
+    color: '#166534',
+    border: '1px solid #BBF7D0',
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
+  refuseBtn: {
+    padding: '6px 14px',
+    borderRadius: 8,
+    background: '#FEF2F2',
+    color: '#B91C1C',
+    border: '1px solid #FECACA',
+    fontSize: 12,
+    fontWeight: 600,
+    cursor: 'pointer',
+  },
   deleteBtn: {
     padding: '6px 14px',
     borderRadius: 8,
@@ -233,12 +268,14 @@ function ConfirmDialog({ onConfirm, onCancel }) {
   );
 }
 
-function PropositionCard({ item, user, onDelete }) {
+const uploadsBaseUrl = `${import.meta.env.VITE_API_URL?.replace('/api', '')}/uploads/`;
+
+function PropositionCard({ item, user, onDelete, onChangeStatus, updatingStatus }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
-  const statut = item.statut || 'EN_ATTENTE';
-  const cfg = statutConfig[statut] || statutConfig.EN_ATTENTE;
+  const statut = item.statut || 'PROPOSEE';
+  const cfg = statutConfig[statut] || statutConfig.PROPOSEE;
 
   const demandeLabel = item.demande
     ? item.demande.titre || 'Demande liée'
@@ -247,6 +284,16 @@ function PropositionCard({ item, user, onDelete }) {
   const femmeName = item.demande?.femme
     ? `${item.demande.femme.firstName || ''} ${item.demande.femme.lastName || ''}`.trim() || '—'
     : '—';
+
+  const associationName = item.association
+    ? item.association.nomOrganisation || `${item.association.firstName || ''} ${item.association.lastName || ''}`.trim() || '—'
+    : '—';
+
+  const isFemme = user?.role === 'FEMME MALADE';
+  const footerLabel = isFemme ? 'Association' : 'Femme concernée';
+  const footerName = isFemme ? associationName : femmeName;
+  const footerAvatar = isFemme ? item.association?.avatar : item.demande?.femme?.avatar;
+  const canRespond = isFemme && statut === 'PROPOSEE';
 
   return (
     <div
@@ -279,15 +326,44 @@ function PropositionCard({ item, user, onDelete }) {
       </div>
       <div style={styles.divider} />
       <div style={styles.cardFooter}>
-        <div style={styles.femmeInfo}>
+        <div style={styles.personInfo}>
+          <Avatar
+            src={footerAvatar ? `${uploadsBaseUrl}${footerAvatar}` : undefined}
+            icon={!footerAvatar && <UserOutlined />}
+            size={40}
+            style={{ flexShrink: 0 }}
+          />
           <div style={styles.femmeLabel}>Femme concernée</div>
-          <div style={styles.femmeName}>{femmeName}</div>
+          <div>
+            <div style={styles.femmeLabel}>{footerLabel}</div>
+            <div style={styles.femmeName}>{footerName}</div>
+          </div>
         </div>
-        {(user?.role === 'ASSOCIATION' || user?.role === 'ADMINISTRATEUR') && (
-          <button style={styles.deleteBtn} onClick={() => setConfirmOpen(true)}>
-            Supprimer
-          </button>
-        )}
+        <div style={styles.actionRow}>
+          {canRespond && (
+            <>
+              <button
+                style={styles.acceptBtn}
+                onClick={() => onChangeStatus(item._id, 'ACCEPTEE')}
+                disabled={updatingStatus}
+              >
+                Accepter
+              </button>
+              <button
+                style={styles.refuseBtn}
+                onClick={() => onChangeStatus(item._id, 'REFUSEE')}
+                disabled={updatingStatus}
+              >
+                Refuser
+              </button>
+            </>
+          )}
+          {(user?.role === 'ASSOCIATION' || user?.role === 'ADMINISTRATEUR') && (
+            <button style={styles.deleteBtn} onClick={() => setConfirmOpen(true)}>
+              Supprimer
+            </button>
+          )}
+        </div>
       </div>
       {confirmOpen && (
         <ConfirmDialog
@@ -304,6 +380,7 @@ export default function PropositionsAideList() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Toutes');
   const [refresh, setRefresh] = useState(false);
+  const [updatingId, setUpdatingId] = useState(null);
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -311,16 +388,42 @@ export default function PropositionsAideList() {
     async function fetchData() {
       setLoading(true);
       try {
-        const response = await listPropositionsAide();
-        setPropositions(response.data.propositions);
+        const [demandesResponse, propositionsResponse] = await Promise.all([
+          listDemandes(user?._id ? { femme: user._id } : {}),
+          listPropositionsAide(),
+        ]);
+
+        const demandes = Array.isArray(demandesResponse?.data?.demandes)
+          ? demandesResponse.data.demandes
+          : [];
+
+        const demandeIds = new Set(
+          demandes
+            .map((demande) => (demande?._id || demande?.id || '').toString())
+            .filter(Boolean)
+        );
+
+        const propositions = Array.isArray(propositionsResponse?.data?.propositions)
+          ? propositionsResponse.data.propositions
+          : [];
+
+        setPropositions(
+          propositions.filter((proposition) => {
+            const demandeId = (proposition?.demande?._id || proposition?.demande || '').toString();
+            return demandeIds.has(demandeId);
+          })
+        );
       } catch (error) {
         console.error(error.message || 'Erreur lors du chargement');
+        setPropositions([]);
       } finally {
         setLoading(false);
       }
     }
-    fetchData();
-  }, [refresh]);
+    if (user) {
+      fetchData();
+    }
+  }, [refresh, user]);
 
   const handleDelete = async (id) => {
     try {
@@ -331,9 +434,22 @@ export default function PropositionsAideList() {
     }
   };
 
+  const handleChangeStatus = async (id, statut) => {
+    try {
+      setUpdatingId(id);
+      await changePropositionAideStatus(id, statut);
+      message.success(statut === 'ACCEPTEE' ? 'Proposition acceptée' : 'Proposition refusée');
+      setRefresh((prev) => !prev);
+    } catch (error) {
+      message.error(error.message || 'Erreur lors du changement de statut');
+    } finally {
+      setUpdatingId(null);
+    }
+  };
+
   const filtered = filter === 'Toutes'
     ? propositions
-    : propositions.filter(p => (p.statut || 'EN_ATTENTE') === filter);
+    : propositions.filter(p => (p.statut || 'PROPOSEE') === filter);
 
   return (
     <div style={styles.page}>
@@ -345,8 +461,12 @@ export default function PropositionsAideList() {
       <div style={styles.header}>
         <div>
           <div style={styles.eyebrow}>Aide & soutien</div>
-          <h1 style={styles.title}>Propositions d'aide</h1>
-          <p style={styles.subtitle}>{propositions.length} proposition{propositions.length !== 1 ? 's' : ''} au total</p>
+          <h1 style={styles.title}>Propositions d'aide reçues</h1>
+          <p style={styles.subtitle}>
+            Après le dépôt de votre demande et sa validation, l'association peut proposer une aide.
+            Vous recevez alors une proposition liée à votre demande que vous pouvez accepter ou refuser.
+            {' '}{propositions.length} proposition{propositions.length !== 1 ? 's' : ''} au total.
+          </p>
         </div>
         {(user?.role === 'ASSOCIATION' || user?.role === 'ADMINISTRATEUR') && (
           <button style={styles.addBtn} onClick={() => navigate('/association/add-proposition-aide')}>
@@ -361,7 +481,7 @@ export default function PropositionsAideList() {
             {FILTER_LABELS[f]}
             {f !== 'Toutes' && (
               <span style={{ marginLeft: 5, opacity: 0.7 }}>
-                ({propositions.filter(p => (p.statut || 'EN_ATTENTE') === f).length})
+                ({propositions.filter(p => (p.statut || 'PROPOSEE') === f).length})
               </span>
             )}
           </button>
@@ -378,7 +498,7 @@ export default function PropositionsAideList() {
           <h3 style={styles.emptyTitle}>Aucune proposition trouvée</h3>
           <p style={styles.emptyText}>
             {filter === 'Toutes'
-              ? "Aucune proposition d'aide pour le moment."
+              ? "Une proposition d'aide apparaîtra ici après validation de votre demande, puis vous pourrez l'accepter ou la refuser."
               : `Aucune proposition avec le statut « ${FILTER_LABELS[filter]} ».`}
           </p>
         </div>
@@ -390,6 +510,8 @@ export default function PropositionsAideList() {
               item={item}
               user={user}
               onDelete={handleDelete}
+              onChangeStatus={handleChangeStatus}
+              updatingStatus={updatingId === item._id}
             />
           ))}
         </div>

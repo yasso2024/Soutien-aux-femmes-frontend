@@ -86,8 +86,8 @@ const AddDemande = () => {
                         Nouvelle demande
                       </Title>
                       <Paragraph style={{ color: "#666", marginBottom: 0 }}>
-                        Décrivez votre besoin afin de permettre à la communauté
-                        de mieux comprendre comment vous aider.
+                        Déposez une demande d'aide en précisant le titre, le type de
+                        besoin et une description détaillée afin de faciliter son traitement.
                       </Paragraph>
                     </div>
 
@@ -99,7 +99,7 @@ const AddDemande = () => {
                         name="titre"
                         rules={[{ required: true, message: "Titre obligatoire" }]}
                       >
-                        <Input placeholder="Ex: Aide pour traitement" />
+                        <Input placeholder="Ex: Aide pour logement temporaire" />
                       </Form.Item>
 
                       <Form.Item
@@ -113,7 +113,7 @@ const AddDemande = () => {
                             { value: "FINANCIERE", label: "Financière" },
                             { value: "MATERIELLE", label: "Matérielle" },
                             { value: "ACCOMPAGNEMENT", label: "Accompagnement" },
-                            { value: "MEDICALE", label: "Médicale" },
+                            { value: "LOGEMENT", label: "Logement" },
                           ]}
                         />
                       </Form.Item>
@@ -123,7 +123,7 @@ const AddDemande = () => {
                         name="description"
                         rules={[{ required: true, message: "Description obligatoire" }]}
                       >
-                        <Input.TextArea rows={5} placeholder="Décrivez votre besoin..." />
+                        <Input.TextArea rows={5} placeholder="Décrivez votre besoin en détail pour permettre un meilleur accompagnement..." />
                       </Form.Item>
 
                       <Form.Item>

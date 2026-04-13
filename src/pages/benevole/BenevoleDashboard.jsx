@@ -128,6 +128,12 @@ const STATUT_COLOR = {
   TERMINEE: "#0ea5e9",
 };
 
+const STATUT_LABEL = {
+  EN_ATTENTE: "En attente",
+  ACCEPTEE: "Acceptée",
+  TERMINEE: "Terminée",
+};
+
 // Minimal calendar widget without antd
 function MiniCalendar() {
   const now = new Date();
@@ -273,11 +279,13 @@ export default function BenevoleDashboard() {
 
   const displayAffectations = affectations.slice(0, 3).map((a) => ({
     titre: a.action?.titre || "Action sans titre",
+    demande: a.demande?.titre || "Aucune demande liée",
     date: a.dateAffectation
       ? new Date(a.dateAffectation).toLocaleDateString("fr-FR")
       : "-",
     lieu: a.action?.lieu || "—",
     statut: a.statut || "EN_ATTENTE",
+    statutLabel: STATUT_LABEL[a.statut] || "En attente",
     statColor: STATUT_COLOR[a.statut] || "#64748b",
   }));
 
@@ -286,10 +294,10 @@ export default function BenevoleDashboard() {
   const competences = user?.competences || [];
 
   const STAT_CARDS = [
-    { label: "Affectations", value: stats.total, icon: "📅", color: PURPLE },
-    { label: "En cours", value: stats.inProgress, icon: "⏳", color: "#EC7FA7" },
-    { label: "Terminées", value: stats.terminated, icon: "✅", color: "#10B981" },
-    { label: "Actions disponibles", value: stats.openActions, icon: "🎯", color: "#F59E0B" },
+    { label: "Affectations reçues", value: stats.total, icon: "📅", color: PURPLE },
+    { label: "Participations confirmées", value: stats.inProgress, icon: "⏳", color: "#EC7FA7" },
+    { label: "Missions terminées", value: stats.terminated, icon: "✅", color: "#10B981" },
+    { label: "Actions à suivre", value: stats.openActions, icon: "🎯", color: "#F59E0B" },
   ];
 
   return (
@@ -308,9 +316,9 @@ export default function BenevoleDashboard() {
               <p style={styles.heroSub}>Espace Bénévole</p>
               <h2 style={styles.heroName}>{user?.firstName || "Bénévole"} {user?.lastName || ""}</h2>
               <p style={styles.heroDesc}>
-                {competences.length > 0 
-                  ? `Compétences : ${competences.join(", ")}` 
-                  : "Prêt à aider"}
+                {competences.length > 0
+                  ? `Acteur terrain, vous participez aux actions solidaires, recevez des demandes d'aide via vos affectations et suivez vos missions selon vos compétences : ${competences.join(", ")}`
+                  : "Acteur terrain, vous participez aux actions solidaires, recevez des demandes d'aide via vos affectations et suivez vos missions."}
               </p>
             </div>
           </div>
@@ -336,7 +344,7 @@ export default function BenevoleDashboard() {
         <div style={styles.mainGrid} className="b-main-grid">
           <div style={styles.card}>
             <div style={styles.cardHeader}>
-              <span style={styles.cardTitle}>Mes affectations récentes</span>
+              <span style={styles.cardTitle}>Demandes d'aide et affectations récentes</span>
               <button style={styles.cardLink} onClick={() => navigate("/benevole/affectations")}>Voir tout</button>
             </div>
             <div style={styles.cardBody}>
@@ -350,9 +358,9 @@ export default function BenevoleDashboard() {
                     <div style={styles.affIcon}>📅</div>
                     <div>
                       <span style={styles.affTitle}>{a.titre}</span>
-                      <span style={styles.affMeta}>{a.date} · {a.lieu}</span>
+                      <span style={styles.affMeta}>{a.date} · {a.lieu} · {a.demande}</span>
                     </div>
-                    <span style={styles.statutPill(a.statColor)}>{a.statut.replace("_", " ")}</span>
+                    <span style={styles.statutPill(a.statColor)}>{a.statutLabel}</span>
                   </div>
                 ))
               )}
@@ -361,7 +369,7 @@ export default function BenevoleDashboard() {
 
           <div style={styles.card}>
             <div style={styles.cardHeader}>
-              <span style={styles.cardTitle}>Actions solidaires</span>
+              <span style={styles.cardTitle}>Participer aux actions solidaires</span>
               <button style={styles.cardLink} onClick={() => navigate("/benevole/affectations")}>Mes affectations</button>
             </div>
             <div style={styles.cardBody}>
@@ -375,7 +383,7 @@ export default function BenevoleDashboard() {
                     <div>
                       <span style={styles.actionTitle}>{a.titre || "Action"}</span>
                       <span style={styles.actionMeta}>
-                        {(a.lieu || "Lieu non précisé") + " · " + (a.dateDebut ? new Date(a.dateDebut).toLocaleDateString("fr-FR") : "Date non précisée")}
+                        {(a.lieu || "Lieu non précisé") + " · " + (a.dateAction ? new Date(a.dateAction).toLocaleDateString("fr-FR") : "Date non précisée")}
                       </span>
                     </div>
                     <button

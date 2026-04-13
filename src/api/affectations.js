@@ -35,3 +35,12 @@ export async function deleteAffectation(id) {
     throw new Error(error.response?.data?.message || error.message);
   }
 }
+
+export async function changeAffectationStatus(id, statut) {
+  try {
+    const response = await axiosClient.put(`/affectations/${id}/statut`, { statut });
+    return response;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
