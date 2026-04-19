@@ -29,6 +29,7 @@ import FemmeDashboard from "./pages/femme/FemmeDashboard";
 import DemandesList from "./pages/femme/DemandesList";
 import AddDemande from "./pages/femme/AddDemande";
 import PropositionsList from "./pages/femme/PropositionsList";
+import AffectationsListFemme from "./pages/femme/AffectationsList";
 
 import AssociationDashboard from "./pages/association/AssociationDashboard";
 import ActionsSolidairesList from "./pages/association/ActionsSolidairesList";
@@ -96,6 +97,7 @@ function App() {
                 <Route path="/femme/demandes" element={<DemandesList />} />
                 <Route path="/femme/add-demande" element={<AddDemande />} />
                 <Route path="/femme/propositions" element={<PropositionsList />} />
+                <Route path="/femme/affectations" element={<AffectationsListFemme />} />
               </Route>
             </Route>
 

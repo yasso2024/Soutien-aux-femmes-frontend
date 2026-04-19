@@ -11,15 +11,15 @@ const TEAL_LIGHT = "#E1F5EE";
 const TEAL_DARK = "#085041";
 
 const statutConfig = {
-  EN_ATTENTE: { label: "En attente", bg: "#FFF7ED", color: "#92400E", dot: "#F59E0B" },
+  PROPOSEE: { label: "Proposée", bg: "#FFF7ED", color: "#92400E", dot: "#F59E0B" },
   ACCEPTEE: { label: "Acceptée", bg: "#F0FDF4", color: "#14532D", dot: "#22C55E" },
   REFUSEE: { label: "Refusée", bg: "#FEF2F2", color: "#991B1B", dot: "#EF4444" },
 };
 
-const FILTERS = ["Toutes", "EN_ATTENTE", "ACCEPTEE", "REFUSEE"];
+const FILTERS = ["Toutes", "PROPOSEE", "ACCEPTEE", "REFUSEE"];
 const FILTER_LABELS = {
   Toutes: "Toutes",
-  EN_ATTENTE: "En attente",
+  PROPOSEE: "Proposées",
   ACCEPTEE: "Acceptées",
   REFUSEE: "Refusées",
 };
@@ -264,8 +264,8 @@ function PropositionCard({ item, user, onDelete }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hover, setHover] = useState(false);
 
-  const statut = item.statut || "EN_ATTENTE";
-  const cfg = statutConfig[statut] || statutConfig.EN_ATTENTE;
+  const statut = item.statut || "PROPOSEE";
+  const cfg = statutConfig[statut] || statutConfig.PROPOSEE;
 
   const demandeLabel = item.demande ? item.demande.titre || "Demande liée" : "—";
   const femmeName = item.demande?.femme

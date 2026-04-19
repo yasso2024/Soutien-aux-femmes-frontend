@@ -161,6 +161,7 @@ export default function FemmeDashboard() {
   const [demandesRecentes, setDemandesRecentes] = useState([]);
   const [propositionsRecentes, setPropositionsRecentes] = useState([]);
   const [affectationsRecentes, setAffectationsRecentes] = useState([]);
+  const [traitementActif, setTraitementActif] = useState([]);
 
   useEffect(() => {
     const h = new Date().getHours();
@@ -221,6 +222,22 @@ export default function FemmeDashboard() {
           demandesAcceptees: demandes.filter((d) => ["VALIDEE", "TERMINEE"].includes(d?.statut)).length,
           affectationsLiees: affectationsLiees.length,
         });
+
+        // Traitements actifs = demandes avec statut EN_COURS
+        const traitementsActifs = demandes
+          .filter((d) => d?.statut === "EN_COURS")
+          .map((d) => ({
+            titre: d?.titre || "Traitement sans titre",
+            description: d?.description || "",
+            type: d?.type || "-",
+            date: d?.createdAt || d?.dateCreation
+              ? new Date(d.createdAt || d.dateCreation).toLocaleDateString("fr-FR")
+              : "-",
+            statColor: STATUS_COLOR_MAP["EN_COURS"] || "#3b82f6",
+            id: d?._id || d?.id,
+          }));
+
+        setTraitementActif(traitementsActifs);
 
         const recentes = [...demandes]
           .sort((a, b) => new Date(b?.createdAt || b?.dateCreation || 0) - new Date(a?.createdAt || a?.dateCreation || 0))
@@ -340,6 +357,49 @@ export default function FemmeDashboard() {
 
         {/* Main */}
         <div style={styles.mainGrid} className="f-main-grid">
+          {/* Section En cours de traitement et Affectations */}
+          {traitementActif.length > 0 && (
+            <div style={styles.card}>
+              <div style={styles.cardHeader}>
+                <span style={styles.cardTitle}>💊 En cours de traitement</span>
+              </div>
+              <div style={styles.cardBody}>
+                {traitementActif.map((t, idx) => (
+                  <div key={idx} style={{ marginBottom: idx === traitementActif.length - 1 ? 0 : 20, paddingBottom: 16, borderBottom: idx === traitementActif.length - 1 ? "none" : "1px solid #f5f5f5" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 8 }}>
+                      <div>
+                        <div style={styles.demandeTitle}>{t.titre}</div>
+                        <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+                          {t.description.substring(0, 60)}{t.description.length > 60 ? "..." : ""}
+                        </div>
+                      </div>
+                      <span style={styles.statutPill(t.statColor)}>EN_COURS</span>
+                    </div>
+                    <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
+                      <span style={styles.typePill}>{t.type}</span>
+                      <span style={styles.dateText}>📅 Depuis {t.date}</span>
+                    </div>
+
+                    {/* Affectations liées à ce traitement */}
+                    {affectationsRecentes.length > 0 && (
+                      <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #f0f0f0", fontSize: 12 }}>
+                        <div style={{ fontWeight: 600, color: "#0f172a", marginBottom: 8 }}>Aides associées:</div>
+                        {affectationsRecentes.map((aff, aidx) => (
+                          <div key={aidx} style={{ fontSize: 12, padding: "6px 8px", background: "#f9f9f9", borderRadius: 6, marginBottom: 4 }}>
+                            <div style={{ color: "#0f172a", fontWeight: 500 }}>👤 {aff.titre}</div>
+                            <div style={{ color: "#64748b", fontSize: 11, marginTop: 2 }}>
+                              Statut: <span style={styles.statutPill(aff.statColor)}>{aff.statut.replace("_", " ")}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div style={styles.card}>
             <div style={styles.cardHeader}>
               <span style={styles.cardTitle}>Mes demandes récentes</span>
@@ -396,7 +456,8 @@ export default function FemmeDashboard() {
 
           <div style={styles.card}>
             <div style={styles.cardHeader}>
-              <span style={styles.cardTitle}>Affectations liées</span>
+              <span style={styles.cardTitle}>📌 Affectations liées</span>
+              <button style={styles.cardLink} onClick={() => navigate("/femme/affectations")}>Voir tout</button>
             </div>
             <div style={styles.cardBody}>
               {affectationsRecentes.length === 0 ? (

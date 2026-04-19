@@ -78,6 +78,25 @@ const Profile = () => {
               ? new Date(user.createdAt).toLocaleDateString("fr-FR")
               : "-"}
           </Descriptions.Item>
+
+          {user?.role === "ASSOCIATION" && (
+            <>
+              <Descriptions.Item label="Nom de l'organisation">
+                {user?.nomOrganisation || "-"}
+              </Descriptions.Item>
+              <Descriptions.Item label="Adresse">
+                {user?.adresse || "-"}
+              </Descriptions.Item>
+            </>
+          )}
+
+          {user?.role === "FEMME MALADE" && (
+            <Descriptions.Item label="Date de diagnostic">
+              {user?.dateDiagnostic
+                ? new Date(user.dateDiagnostic).toLocaleDateString("fr-FR")
+                : "-"}
+            </Descriptions.Item>
+          )}
         </Descriptions>
 
         <div style={{ marginTop: 16 }}>

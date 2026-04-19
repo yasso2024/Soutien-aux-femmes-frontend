@@ -5,20 +5,39 @@ import { savePlayerID } from "../api/users";
 export const AuthContext = createContext();
 
 async function registerOneSignal(userId) {
-  try {
-    const OS = window.OneSignal;
-    if (!OS) { console.warn("[OneSignal] SDK not loaded yet"); return; }
-    await OS.login(String(userId));
-    const subscriptionId = OS.User?.PushSubscription?.id;
-    console.log("[OneSignal] linked user:", userId, "| subscription id:", subscriptionId);
-    if (subscriptionId) {
-      await savePlayerID(subscriptionId);
-      console.log("[OneSignal] player id saved to backend:", subscriptionId);
-    } else {
-      console.warn("[OneSignal] no subscription id after login — user may not have opted in yet");
+  if (!userId) return;
+
+  const registerHandler = async (OneSignal) => {
+    try {
+      if (!OneSignal || typeof OneSignal.setExternalUserId !== "function") {
+        console.warn("[OneSignal] SDK not loaded or setExternalUserId unavailable");
+        return;
+      }
+
+      await OneSignal.setExternalUserId(String(userId));
+      const subscriptionId = typeof OneSignal.getUserId === "function"
+        ? await OneSignal.getUserId()
+        : OneSignal.User?.PushSubscription?.id;
+
+      console.log("[OneSignal] external user set:", userId, "| subscription id:", subscriptionId);
+
+      if (subscriptionId) {
+        await savePlayerID(subscriptionId);
+        console.log("[OneSignal] player id saved to backend:", subscriptionId);
+      } else {
+        console.warn("[OneSignal] no subscription id after setting external user — user may not have opted in yet");
+      }
+    } catch (err) {
+      console.warn("OneSignal registration failed:", err?.message || err);
+      // Don't throw error - let the app continue without OneSignal
     }
-  } catch (err) {
-    console.warn("OneSignal registration failed:", err.message);
+  };
+
+  // Only push to deferred if OneSignalDeferred exists
+  if (window.OneSignalDeferred) {
+    window.OneSignalDeferred.push(registerHandler);
+  } else {
+    console.warn("[OneSignal] OneSignalDeferred not available, skipping registration");
   }
 }
 
@@ -59,7 +78,13 @@ function AuthContextProvider({ children }) {
     localStorage.removeItem("token");
     setTokenState(null);
     setUser(null);
-    try { window.OneSignal?.logout(); } catch {}
+    try {
+      if (window.OneSignal?.logout) {
+        window.OneSignal.logout();
+      }
+    } catch (err) {
+      console.warn("OneSignal logout failed:", err?.message || err);
+    }
   }
 
   useEffect(() => {
