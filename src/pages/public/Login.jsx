@@ -109,6 +109,7 @@ function Login() {
                     name="password"
                     rules={[
                       { required: true, message: "Password required" },
+                      { min: 8, message: "Le mot de passe doit contenir au moins 8 caractères" },
                     ]}
                   >
                     <Input.Password placeholder="Enter your password" autoComplete="current-password" />

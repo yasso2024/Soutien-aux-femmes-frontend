@@ -205,6 +205,9 @@ export default function Events() {
   const [createError, setCreateError] = useState("");
   const [inscriptionLoadingId, setInscriptionLoadingId] = useState("");
   const [inscriptionMessage, setInscriptionMessage] = useState("");
+  // Min date for event creation = today at current time (no past dates allowed)
+  const todayMin = new Date().toISOString().slice(0, 16);
+
   const [createForm, setCreateForm] = useState({
     titre: "",
     description: "",
@@ -352,7 +355,14 @@ export default function Events() {
   const getMonthShort = (dateStr) => new Date(dateStr).toLocaleDateString("fr-FR", { month: "short" }).toUpperCase();
 
   return (
-    <div style={{ fontFamily: "'Segoe UI', system-ui, sans-serif", minHeight: "100vh", background: "#FFF5F7" }}>
+    <div style={{ fontFamily: "'DM Sans', 'Segoe UI', sans-serif", minHeight: "100vh", background: "linear-gradient(160deg, #FFF0F5 0%, #FFF8F4 60%, #FDF6F0 100%)" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap');
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        .ev-card { animation: cardIn 0.35s ease both; }
+        .ev-card:hover { transform: translateY(-5px) !important; box-shadow: 0 18px 52px rgba(194,24,91,0.18) !important; }
+      `}</style>
       {/* Hero */}
       <div style={{
         background: `linear-gradient(135deg, ${PINK} 0%, #9C1843 100%)`,
@@ -362,11 +372,16 @@ export default function Events() {
       }}>
         <div style={{ position: "absolute", top: -60, right: -60, width: 240, height: 240, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
         <div style={{ maxWidth: 900, margin: "0 auto", position: "relative", zIndex: 1 }}>
-          <h1 style={{ color: "#fff", fontSize: 38, fontWeight: 800, margin: "0 0 10px" }}>
-            🎪 Événements
+          <div style={{ marginBottom: 8 }}>
+            <span style={{ display: "inline-block", background: "rgba(255,255,255,0.15)", border: "1px solid rgba(255,255,255,0.3)", borderRadius: 999, padding: "5px 18px", fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,0.9)", letterSpacing: "0.1em", marginBottom: 16 }}>
+              🌸 COURAGE ROSE — AGENDA
+            </span>
+          </div>
+          <h1 style={{ color: "#fff", fontSize: 48, fontWeight: 900, margin: "0 0 12px", fontFamily: "'Playfair Display', Georgia, serif", lineHeight: 1.1 }}>
+            Nos Événements
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, margin: "0 0 28px" }}>
-            Participez à nos actions solidaires, conférences et ateliers bien-être
+          <p style={{ color: "rgba(255,255,255,0.85)", fontSize: 16, margin: "0 0 28px", lineHeight: 1.7, fontStyle: "italic" }}>
+            Rejoignez nos actions solidaires, ateliers bien-être et moments de partage
           </p>
 
           {/* Search bar */}
@@ -469,12 +484,14 @@ export default function Events() {
               <input
                 type="datetime-local"
                 value={createForm.dateDebut}
+                min={todayMin}
                 onChange={(ev) => handleCreateFormChange("dateDebut", ev.target.value)}
                 style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.95)", fontSize: 13 }}
               />
               <input
                 type="datetime-local"
                 value={createForm.dateFin}
+                min={createForm.dateDebut || todayMin}
                 onChange={(ev) => handleCreateFormChange("dateFin", ev.target.value)}
                 style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid rgba(255,255,255,0.35)", background: "rgba(255,255,255,0.95)", fontSize: 13 }}
               />
@@ -620,47 +637,43 @@ export default function Events() {
                   return (
                     <div
                       key={eventId || `${event.titre}-${eventDate}`}
+                      className="ev-card"
                       style={{
                         background: "#fff",
-                        borderRadius: 16,
-                        border: "1.5px solid #FCE4EC",
+                        borderRadius: 22,
                         overflow: "hidden",
                         display: "flex",
                         flexDirection: isGrid ? "column" : "row",
-                        gap: 0,
-                        boxShadow: "0 3px 14px rgba(233,30,99,0.07)",
-                        transition: "all 0.25s ease",
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = viewMode === "grid" ? "translateY(-3px)" : "translateX(4px)";
-                        e.currentTarget.style.boxShadow = "0 6px 24px rgba(233,30,99,0.14)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = viewMode === "grid" ? "translateY(0)" : "translateX(0)";
-                        e.currentTarget.style.boxShadow = "0 3px 14px rgba(233,30,99,0.07)";
+                        boxShadow: "0 4px 24px rgba(194,24,91,0.08)",
+                        transition: "transform 0.25s, box-shadow 0.25s",
                       }}
                     >
                       {/* Date badge */}
                       <div
                         style={{
-                          background: `linear-gradient(135deg, ${PINK}, ${PINK_DARK})`,
-                          minWidth: isGrid ? "100%" : 72,
+                          background: isGrid
+                            ? `linear-gradient(135deg, ${PINK_DARK} 0%, ${PINK} 100%)`
+                            : `linear-gradient(180deg, ${PINK_DARK} 0%, ${PINK} 100%)`,
+                          minWidth: isGrid ? "100%" : 80,
                           width: isGrid ? "100%" : "auto",
                           display: "flex",
                           flexDirection: "column",
                           alignItems: "center",
                           justifyContent: "center",
-                          padding: isGrid ? "12px 10px" : "16px 10px",
+                          padding: isGrid ? "20px 20px 16px" : "20px 14px",
+                          position: "relative",
+                          overflow: "hidden",
                         }}
                       >
-                        <span style={{ color: "rgba(255,255,255,0.8)", fontSize: 11, fontWeight: 700, letterSpacing: 1 }}>{getMonthShort(eventDate)}</span>
-                        <span style={{ color: "#fff", fontSize: 32, fontWeight: 900, lineHeight: 1 }}>{getDayNumber(eventDate)}</span>
+                        <div style={{ position: "absolute", right: -18, top: -18, width: 70, height: 70, borderRadius: "50%", background: "rgba(255,255,255,0.08)" }} />
+                        <span style={{ color: "rgba(255,255,255,0.75)", fontSize: 10, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", display: "block", position: "relative", zIndex: 1 }}>{getMonthShort(eventDate)}</span>
+                        <span style={{ color: "#fff", fontSize: isGrid ? 48 : 38, fontWeight: 900, lineHeight: 1, fontFamily: "'Playfair Display', Georgia, serif", position: "relative", zIndex: 1 }}>{getDayNumber(eventDate)}</span>
                       </div>
 
                       {/* Content */}
                       <div style={{ flex: 1, padding: "16px 20px" }}>
                         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 8 }}>
-                          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#1E293B", lineHeight: 1.3 }}>{event.titre}</h3>
+                          <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#1d0a14", lineHeight: 1.35, fontFamily: "'Playfair Display', Georgia, serif" }}>{event.titre}</h3>
                           <span style={{ background: catStyle.bg, color: catStyle.color, border: `1px solid ${catStyle.border}`, padding: "3px 10px", borderRadius: 20, fontSize: 11, fontWeight: 600, whiteSpace: "nowrap", flexShrink: 0 }}>
                             {categoryLabel}
                           </span>
@@ -736,7 +749,7 @@ export default function Events() {
           </div>
         </div>
       </div>
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+      <style>{`@keyframes _unused_ { }`}</style>
     </div>
   );
 }

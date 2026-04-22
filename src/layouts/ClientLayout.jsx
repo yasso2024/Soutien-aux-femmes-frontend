@@ -13,6 +13,7 @@ import {
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import ChatBot from "../components/chatbot/ChatBot";
+import { listNotifications } from "../api/notifications";
 
 const { Header, Content, Sider } = Layout;
 const { Text } = Typography;
@@ -47,6 +48,7 @@ const menuConfig = {
   ],
   BENEVOLE: [
     { key: "/benevole/dashboard", label: "Home", icon: "🏠" },
+    { key: "/benevole/actions-solidaires", label: "Actions solidaires", icon: "🤝" },
     { key: "/benevole/affectations", label: "Affectations", icon: "📅" },
     { key: "/notifications", label: "Notifications", icon: "🔔" },
     { key: "/profile", label: "Profil", icon: "👤" },
@@ -91,7 +93,27 @@ export default function ClientLayout() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const location = useLocation();
-  const [unreadCount] = useState(3);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const fetchCount = async () => {
+      try {
+        const res = await listNotifications();
+        const notifications = Array.isArray(res?.data?.notifications)
+          ? res.data.notifications
+          : Array.isArray(res?.data)
+          ? res.data
+          : [];
+        if (!cancelled) setUnreadCount(notifications.filter((n) => !n.lu).length);
+      } catch {
+        // silently ignore
+      }
+    };
+    fetchCount();
+    const interval = setInterval(fetchCount, 60000);
+    return () => { cancelled = true; clearInterval(interval); };
+  }, [location.pathname]);
 
   const items = (menuConfig[user?.role] || []).map(item => ({
     key: item.key,

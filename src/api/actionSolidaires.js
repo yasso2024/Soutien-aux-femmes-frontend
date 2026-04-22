@@ -44,3 +44,12 @@ export async function participerAction(id) {
     throw new Error(error.response?.data?.message || error.message);
   }
 }
+
+export async function changeActionStatus(id, statut) {
+  try {
+    const response = await axiosClient.put(`/actions-solidaires/${id}/statut`, { statut });
+    return response;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}

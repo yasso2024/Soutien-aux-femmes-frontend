@@ -177,25 +177,32 @@ const styles = {
 
 const statutColorMap = {
   EN_ATTENTE: "#f59e0b",
-  TERMINEE: "#22c55e",
+  VALIDEE:    "#0ea5e9",
+  REFUSEE:    "#ef4444",
+  TERMINEE:   "#22c55e",
+};
+
+const statutLabelMap = {
+  EN_ATTENTE: "En attente",
+  VALIDEE:    "Validée",
+  REFUSEE:    "Refusée",
+  TERMINEE:   "Terminée",
 };
 
 function getActionStatus(action) {
-  if (!action?.dateAction) return "EN_ATTENTE";
-
-  const actionDate = new Date(action.dateAction);
-  if (Number.isNaN(actionDate.getTime())) return "EN_ATTENTE";
-
-  const endOfActionDay = new Date(actionDate);
-  endOfActionDay.setHours(23, 59, 59, 999);
-
-  return endOfActionDay < new Date() ? "TERMINEE" : "EN_ATTENTE";
+  return action?.statut || "EN_ATTENTE";
 }
 
 const propositionColorMap = {
   PROPOSEE: "#f59e0b",
   ACCEPTEE: "#22c55e",
   REFUSEE: "#ef4444",
+};
+
+const propositionLabelMap = {
+  PROPOSEE: "Proposée",
+  ACCEPTEE: "Acceptée",
+  REFUSEE: "Refusée",
 };
 
 function formatDate(dateValue) {
@@ -249,13 +256,15 @@ export default function AssociationDashboard() {
   const stats = useMemo(() => {
     const totalActions = actions.length;
     const totalPropositions = propositions.length;
-    const actionsEnAttente = actions.filter((a) => getActionStatus(a) === "EN_ATTENTE").length;
-    const actionsTerminees = actions.filter((a) => getActionStatus(a) === "TERMINEE").length;
+    const actionsEnAttente = actions.filter((a) => (a?.statut || "EN_ATTENTE") === "EN_ATTENTE").length;
+    const actionsValidees = actions.filter((a) => a?.statut === "VALIDEE").length;
+    const actionsTerminees = actions.filter((a) => a?.statut === "TERMINEE").length;
 
     return [
       { label: "Actions solidaires", value: totalActions, icon: "📅", color: TEAL },
       { label: "Propositions d'aide", value: totalPropositions, icon: "✅", color: "#EC7FA7" },
       { label: "Actions en attente", value: actionsEnAttente, icon: "🕒", color: "#f59e0b" },
+      { label: "Actions validées", value: actionsValidees, icon: "🎯", color: "#0ea5e9" },
       { label: "Actions terminées", value: actionsTerminees, icon: "✔️", color: "#22c55e" },
     ];
   }, [actions, propositions]);
@@ -380,7 +389,7 @@ export default function AssociationDashboard() {
                           </div>
 
                           <span style={styles.statutPill(pillColor)}>
-                            {statut.replace("_", " ")}
+                            {statutLabelMap[statut] || statut.replace("_", " ")}
                           </span>
                         </div>
                       );
@@ -427,7 +436,7 @@ export default function AssociationDashboard() {
                           </div>
 
                           <span style={styles.statutPill(pillColor)}>
-                            {statut.replace("_", " ")}
+                            {propositionLabelMap[statut] || statut.replace("_", " ")}
                           </span>
                         </div>
                       );

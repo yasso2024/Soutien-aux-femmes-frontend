@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
 import { listDemandes } from "../../api/demandes";
 import { listPropositionsAide } from "../../api/propositionsAide";
-import { listAffectations } from "../../api/affectations";
 import { listNotifications } from "../../api/notifications";
 
 const PINK = "#EC7FA7";
@@ -146,6 +145,16 @@ const STATUS_COLOR_MAP = {
   ACCEPTEE: "#22c55e",
 };
 
+const STATUS_LABEL_MAP = {
+  EN_ATTENTE: "En attente",
+  VALIDEE: "Validée",
+  REFUSEE: "Refusée",
+  EN_COURS: "En cours",
+  TERMINEE: "Terminée",
+  PROPOSEE: "Proposée",
+  ACCEPTEE: "Acceptée",
+};
+
 export default function FemmeDashboard() {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -173,11 +182,10 @@ export default function FemmeDashboard() {
       try {
         const userId = user?._id || user?.id;
 
-        const [demandesRes, propositionsRes, affectationsRes, notificationsRes] =
+        const [demandesRes, propositionsRes, notificationsRes] =
           await Promise.all([
             listDemandes(userId ? { femme: userId } : {}),
             listPropositionsAide(),
-            listAffectations(),
             listNotifications(),
           ]);
 
@@ -185,29 +193,10 @@ export default function FemmeDashboard() {
           ? demandesRes.data.demandes
           : [];
 
-        const demandeIds = new Set(
-          demandes
-            .map((d) => (d?._id || d?.id || "").toString())
-            .filter(Boolean)
-        );
-
-        const propositions = Array.isArray(propositionsRes?.data?.propositions)
+        // Backend already filters propositions for FEMME MALADE
+        const propositionsLiees = Array.isArray(propositionsRes?.data?.propositions)
           ? propositionsRes.data.propositions
           : [];
-
-        const propositionsLiees = propositions.filter((p) => {
-          const demandeId = (p?.demande?._id || p?.demande || "").toString();
-          return demandeIds.has(demandeId);
-        });
-
-        const affectations = Array.isArray(affectationsRes?.data?.affectations)
-          ? affectationsRes.data.affectations
-          : [];
-
-        const affectationsLiees = affectations.filter((a) => {
-          const demandeId = (a?.demande?._id || a?.demande || "").toString();
-          return demandeIds.has(demandeId);
-        });
 
         const notifications = Array.isArray(notificationsRes?.data?.notifications)
           ? notificationsRes.data.notifications
@@ -220,7 +209,7 @@ export default function FemmeDashboard() {
           propositionsRecues: propositionsLiees.length,
           enCoursTraitement: demandes.filter((d) => d?.statut === "EN_COURS").length,
           demandesAcceptees: demandes.filter((d) => ["VALIDEE", "TERMINEE"].includes(d?.statut)).length,
-          affectationsLiees: affectationsLiees.length,
+          affectationsLiees: propositionsLiees.filter((p) => p?.statut === "ACCEPTEE").length,
         });
 
         // Traitements actifs = demandes avec statut EN_COURS
@@ -264,16 +253,17 @@ export default function FemmeDashboard() {
             statColor: STATUS_COLOR_MAP[p?.statut] || "#3b82f6",
           }));
 
-        const affRecentes = [...affectationsLiees]
-          .sort((a, b) => new Date(b?.dateAffectation || b?.createdAt || 0) - new Date(a?.dateAffectation || a?.createdAt || 0))
+        const affRecentes = [...propositionsLiees]
+          .filter((p) => p?.statut === "ACCEPTEE")
+          .sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0))
           .slice(0, 3)
-          .map((a) => ({
-            titre: a?.action?.titre || a?.demande?.titre || "Affectation liée",
-            date: a?.dateAffectation || a?.createdAt
-              ? new Date(a.dateAffectation || a.createdAt).toLocaleDateString("fr-FR")
+          .map((p) => ({
+            titre: p?.association?.nomOrganisation || `${p?.association?.firstName || ""} ${p?.association?.lastName || ""}`.trim() || "Association",
+            date: p?.createdAt
+              ? new Date(p.createdAt).toLocaleDateString("fr-FR")
               : "-",
-            statut: a?.statut || "EN_ATTENTE",
-            statColor: STATUS_COLOR_MAP[a?.statut] || "#0ea5e9",
+            statut: "ACCEPTEE",
+            statColor: "#22c55e",
           }));
 
         setDemandesRecentes(recentes);
@@ -373,7 +363,7 @@ export default function FemmeDashboard() {
                           {t.description.substring(0, 60)}{t.description.length > 60 ? "..." : ""}
                         </div>
                       </div>
-                      <span style={styles.statutPill(t.statColor)}>EN_COURS</span>
+                      <span style={styles.statutPill(t.statColor)}>{STATUS_LABEL_MAP["EN_COURS"]}</span>
                     </div>
                     <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8 }}>
                       <span style={styles.typePill}>{t.type}</span>
@@ -388,7 +378,7 @@ export default function FemmeDashboard() {
                           <div key={aidx} style={{ fontSize: 12, padding: "6px 8px", background: "#f9f9f9", borderRadius: 6, marginBottom: 4 }}>
                             <div style={{ color: "#0f172a", fontWeight: 500 }}>👤 {aff.titre}</div>
                             <div style={{ color: "#64748b", fontSize: 11, marginTop: 2 }}>
-                              Statut: <span style={styles.statutPill(aff.statColor)}>{aff.statut.replace("_", " ")}</span>
+                              Statut: <span style={styles.statutPill(aff.statColor)}>{STATUS_LABEL_MAP[aff.statut] || aff.statut.replace("_", " ")}</span>
                             </div>
                           </div>
                         ))}
@@ -420,7 +410,7 @@ export default function FemmeDashboard() {
                         <span style={styles.dateText}>📅 {d.date}</span>
                       </div>
                     </div>
-                    <span style={styles.statutPill(d.statColor)}>{d.statut.replace("_", " ")}</span>
+                    <span style={styles.statutPill(d.statColor)}>{STATUS_LABEL_MAP[d.statut] || d.statut.replace("_", " ")}</span>
                   </div>
                 ))
               )}
@@ -447,7 +437,7 @@ export default function FemmeDashboard() {
                       <span style={styles.propositionTitle}>{p.titre}</span>
                       <span style={styles.propositionMeta}>📅 {p.date}</span>
                     </div>
-                    <span style={styles.statutPill(p.statColor)}>{p.statut.replace("_", " ")}</span>
+                    <span style={styles.statutPill(p.statColor)}>{STATUS_LABEL_MAP[p.statut] || p.statut.replace("_", " ")}</span>
                   </div>
                 ))
               )}
@@ -471,7 +461,7 @@ export default function FemmeDashboard() {
                       <span style={styles.propositionTitle}>{a.titre}</span>
                       <span style={styles.propositionMeta}>📅 {a.date}</span>
                     </div>
-                    <span style={styles.statutPill(a.statColor)}>{a.statut.replace("_", " ")}</span>
+                    <span style={styles.statutPill(a.statColor)}>{STATUS_LABEL_MAP[a.statut] || a.statut.replace("_", " ")}</span>
                   </div>
                 ))
               )}

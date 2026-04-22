@@ -39,6 +39,7 @@ import AddPropositionAide from "./pages/association/AddPropositionAide";
 
 import BenevoleDashboard from "./pages/benevole/BenevoleDashboard";
 import AffectationsList from "./pages/benevole/AffectationsList";
+import ActionsSolidairesBenevole from "./pages/benevole/ActionsSolidairesBenevole";
 
 import DonateurDashboard from "./pages/donateur/DonateurDashboard";
 import AddDon from "./pages/donateur/AddDon";
@@ -56,7 +57,7 @@ function App() {
       }}
     >
       <AntdApp>
-        <BrowserRouter>
+        <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
           <Routes>
             <Route element={<PublicLayout />}>
               <Route path="/" element={<Home />} />
@@ -129,6 +130,7 @@ function App() {
             <Route element={<ProtectedRoute allowedRoles={["BENEVOLE"]} />}>
               <Route element={<ClientLayout />}>
                 <Route path="/benevole/dashboard" element={<BenevoleDashboard />} />
+                <Route path="/benevole/actions-solidaires" element={<ActionsSolidairesBenevole />} />
                 <Route
                   path="/benevole/affectations"
                   element={<AffectationsList />}

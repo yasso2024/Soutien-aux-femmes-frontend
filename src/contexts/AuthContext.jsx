@@ -5,39 +5,36 @@ import { savePlayerID } from "../api/users";
 export const AuthContext = createContext();
 
 async function registerOneSignal(userId) {
-  if (!userId) return;
+  // Skip silently when not running on the OneSignal-configured port
+  if (!userId || window.location.port !== "5173") return;
 
   const registerHandler = async (OneSignal) => {
     try {
-      if (!OneSignal || typeof OneSignal.setExternalUserId !== "function") {
-        console.warn("[OneSignal] SDK not loaded or setExternalUserId unavailable");
+      // v16 SDK: login() requires the SDK to be fully initialized
+      if (typeof OneSignal.login === "function" && OneSignal.User !== undefined) {
+        await OneSignal.login(String(userId));
+      } else {
+        console.warn("[OneSignal] login() unavailable — SDK may not be v16");
         return;
       }
 
-      await OneSignal.setExternalUserId(String(userId));
-      const subscriptionId = typeof OneSignal.getUserId === "function"
-        ? await OneSignal.getUserId()
-        : OneSignal.User?.PushSubscription?.id;
-
-      console.log("[OneSignal] external user set:", userId, "| subscription id:", subscriptionId);
+      const subscriptionId = OneSignal.User?.PushSubscription?.id;
 
       if (subscriptionId) {
         await savePlayerID(subscriptionId);
         console.log("[OneSignal] player id saved to backend:", subscriptionId);
       } else {
-        console.warn("[OneSignal] no subscription id after setting external user — user may not have opted in yet");
+        console.warn("[OneSignal] no subscription id — user may not have opted in yet");
       }
     } catch (err) {
       console.warn("OneSignal registration failed:", err?.message || err);
-      // Don't throw error - let the app continue without OneSignal
     }
   };
 
-  // Only push to deferred if OneSignalDeferred exists
   if (window.OneSignalDeferred) {
     window.OneSignalDeferred.push(registerHandler);
-  } else {
-    console.warn("[OneSignal] OneSignalDeferred not available, skipping registration");
+  } else if (window.OneSignal) {
+    await registerHandler(window.OneSignal);
   }
 }
 

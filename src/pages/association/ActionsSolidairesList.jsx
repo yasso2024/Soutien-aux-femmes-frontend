@@ -5,6 +5,7 @@ import {
   deleteActionSolidaire,
   listActionsSolidaires,
   participerAction,
+  changeActionStatus,
 } from "../../api/actionSolidaires";
 
 const TEAL = "#0F9488";
@@ -13,24 +14,23 @@ const TEAL_DARK = "#085041";
 
 const statutConfig = {
   EN_ATTENTE: { label: "En attente", bg: "#FFF7ED", color: "#92400E", dot: "#F59E0B" },
-  TERMINEE: { label: "Terminée", bg: "#F0FDF4", color: "#14532D", dot: "#22C55E" },
+  VALIDEE:    { label: "Validée",    bg: "#F0FDF4", color: "#14532D", dot: "#22C55E" },
+  REFUSEE:    { label: "Refusée",    bg: "#FEF2F2", color: "#991B1B", dot: "#EF4444" },
+  TERMINEE:   { label: "Terminée",   bg: "#F8FAFC", color: "#334155", dot: "#94A3B8" },
 };
 
 function getActionStatus(action) {
-  if (!action?.dateAction) {
-    return "EN_ATTENTE";
+  // Use stored statut if it's been explicitly set by admin
+  if (action?.statut && action.statut !== 'EN_ATTENTE') {
+    return action.statut;
   }
-
+  // Otherwise derive from date
+  if (!action?.dateAction) return 'EN_ATTENTE';
   const actionDate = new Date(action.dateAction);
-
-  if (Number.isNaN(actionDate.getTime())) {
-    return "EN_ATTENTE";
-  }
-
+  if (Number.isNaN(actionDate.getTime())) return 'EN_ATTENTE';
   const endOfActionDay = new Date(actionDate);
   endOfActionDay.setHours(23, 59, 59, 999);
-
-  return endOfActionDay < new Date() ? "TERMINEE" : "EN_ATTENTE";
+  return endOfActionDay < new Date() ? 'TERMINEE' : 'EN_ATTENTE';
 }
 
 const styles = {
@@ -268,10 +268,12 @@ const styles = {
   },
 };
 
-const FILTERS = ["Toutes", "EN_ATTENTE", "TERMINEE"];
+const FILTERS = ["Toutes", "EN_ATTENTE", "VALIDEE", "REFUSEE", "TERMINEE"];
 const FILTER_LABELS = {
   Toutes: "Toutes",
   EN_ATTENTE: "En attente",
+  VALIDEE: "Validées",
+  REFUSEE: "Refusées",
   TERMINEE: "Terminées",
 };
 
@@ -349,7 +351,7 @@ function ConfirmDialog({ message: msg, onConfirm, onCancel }) {
   );
 }
 
-function ActionCard({ item, user, onParticiper, onDelete }) {
+function ActionCard({ item, user, onParticiper, onDelete, onStatusChange }) {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [hover, setHover] = useState(false);
   const statut = getActionStatus(item);
@@ -430,10 +432,27 @@ function ActionCard({ item, user, onParticiper, onDelete }) {
         </div>
 
         <div style={styles.actionBtns}>
-          {user?.role === "BENEVOLE" && statut === "EN_ATTENTE" && (
+          {user?.role === "BENEVOLE" && statut === "VALIDEE" && (
             <button style={styles.participerBtn} onClick={() => onParticiper(item._id)}>
               Participer
             </button>
+          )}
+
+          {user?.role === "ADMINISTRATEUR" && statut === "EN_ATTENTE" && (
+            <>
+              <button
+                style={{ ...styles.participerBtn, background: "#16A34A" }}
+                onClick={() => onStatusChange(item._id, "VALIDEE")}
+              >
+                ✓ Accepter
+              </button>
+              <button
+                style={{ ...styles.deleteBtn }}
+                onClick={() => onStatusChange(item._id, "REFUSEE")}
+              >
+                ✗ Refuser
+              </button>
+            </>
           )}
 
           {(user?.role === "ASSOCIATION" || user?.role === "ADMINISTRATEUR") && (
@@ -498,6 +517,17 @@ const ActionsSolidairesList = () => {
       setRefresh((prev) => !prev);
     } catch (error) {
       console.error(error.message || "Erreur lors de la suppression");
+    }
+  };
+
+  const handleStatusChange = async (id, statut) => {
+    try {
+      await changeActionStatus(id, statut);
+      setActions((prev) =>
+        prev.map((a) => (a._id === id ? { ...a, statut } : a))
+      );
+    } catch (error) {
+      console.error(error.message || "Erreur lors du changement de statut");
     }
   };
 
@@ -585,6 +615,7 @@ const ActionsSolidairesList = () => {
               user={user}
               onParticiper={handleParticiper}
               onDelete={handleDelete}
+              onStatusChange={handleStatusChange}
             />
           ))}
         </div>

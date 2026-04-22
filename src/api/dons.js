@@ -1,5 +1,21 @@
 import axiosClient from "../utils/axiosClient";
 
+export async function getDonatorStats() {
+  try {
+    return await axiosClient.get("/dons/my-stats");
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
+
+export async function getDonatorPropositions() {
+  try {
+    return await axiosClient.get("/dons/my-propositions");
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
+
 export async function listDons(params = {}) {
   try {
     return await axiosClient.get("/dons", { params });

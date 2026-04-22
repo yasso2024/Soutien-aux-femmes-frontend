@@ -1,4 +1,4 @@
-import { App, Badge, Button, Divider, List, Typography, Empty, Popconfirm } from "antd";
+import { App, Badge, Button, Divider, Typography, Empty, Popconfirm, Spin } from "antd";
 import { BellOutlined, CheckOutlined, DeleteOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import {
@@ -70,74 +70,72 @@ const NotificationsList = () => {
       {notifications.length === 0 ? (
         <Empty description="Aucune notification" />
       ) : (
-        <List
-          loading={loading}
-          dataSource={notifications}
-          renderItem={(item) => (
-            <List.Item
-              style={{
-                background: item.lu ? "#fff" : "#fff0f6",
-                borderRadius: 10,
-                marginBottom: 8,
-                padding: "12px 16px",
-                border: item.lu ? "1px solid #f0f0f0" : "1px solid #f7d7e5",
-              }}
-              actions={[
-                !item.lu && (
-                  <Button
-                    key="read"
-                    type="text"
-                    icon={<CheckOutlined />}
-                    size="small"
-                    onClick={() => handleMarkAsRead(item._id)}
-                    style={{ color: "#f7078b" }}
-                  >
-                    Lue
-                  </Button>
-                ),
-                <Popconfirm
-                  key="delete-pop"
-                  title="Supprimer cette notification ?"
-                  onConfirm={() => handleDelete(item._id)}
-                  okText="Oui"
-                  cancelText="Non"
+        <Spin spinning={loading}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {notifications.map((item) => (
+              <div
+                key={item._id}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  background: item.lu ? "#fff" : "#fff0f6",
+                  borderRadius: 10,
+                  padding: "12px 16px",
+                  border: item.lu ? "1px solid #f0f0f0" : "1px solid #f7d7e5",
+                }}
+              >
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: item.lu ? "#f0f0f0" : "#f7078b",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexShrink: 0,
+                  }}
                 >
-                  <Button key="delete" type="text" icon={<DeleteOutlined />} size="small" danger />
-                </Popconfirm>,
-              ].filter(Boolean)}
-            >
-              <List.Item.Meta
-                avatar={
-                  <div
-                    style={{
-                      width: 36,
-                      height: 36,
-                      borderRadius: "50%",
-                      background: item.lu ? "#f0f0f0" : "#f7078b",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <BellOutlined style={{ color: item.lu ? "#999" : "#fff", fontSize: 16 }} />
-                  </div>
-                }
-                title={
-                  <Text strong={!item.lu} style={{ color: item.lu ? "#666" : "#1f1f1f" }}>
+                  <BellOutlined style={{ color: item.lu ? "#999" : "#fff", fontSize: 16 }} />
+                </div>
+
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <Text strong={!item.lu} style={{ color: item.lu ? "#666" : "#1f1f1f", display: "block" }}>
                     {item.message || item.titre || "-"}
                   </Text>
-                }
-                description={
                   <Text type="secondary" style={{ fontSize: 12 }}>
                     {item.createdAt || item.dateEnvoi || item.date
                       ? new Date(item.createdAt || item.dateEnvoi || item.date).toLocaleString("fr-FR")
                       : "-"}
                   </Text>
-                }
-              />
-            </List.Item>
-          )}
-        />
+                </div>
+
+                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                  {!item.lu && (
+                    <Button
+                      type="text"
+                      icon={<CheckOutlined />}
+                      size="small"
+                      onClick={() => handleMarkAsRead(item._id)}
+                      style={{ color: "#f7078b" }}
+                    >
+                      Lue
+                    </Button>
+                  )}
+                  <Popconfirm
+                    title="Supprimer cette notification ?"
+                    onConfirm={() => handleDelete(item._id)}
+                    okText="Oui"
+                    cancelText="Non"
+                  >
+                    <Button type="text" icon={<DeleteOutlined />} size="small" danger />
+                  </Popconfirm>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Spin>
       )}
     </div>
   );

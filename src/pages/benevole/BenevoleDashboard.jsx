@@ -285,7 +285,7 @@ export default function BenevoleDashboard() {
       : "-",
     lieu: a.action?.lieu || "—",
     statut: a.statut || "EN_ATTENTE",
-    statutLabel: STATUT_LABEL[a.statut] || "En attente",
+    statutLabel: STATUT_LABEL[a.statut] || a.statut || "En attente",
     statColor: STATUT_COLOR[a.statut] || "#64748b",
   }));
 

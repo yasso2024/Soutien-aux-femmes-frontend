@@ -8,7 +8,7 @@ import {
   deleteNotification,
   deleteAllNotifications,
 } from "../../api/notifications"; // adjust path
-// import { AuthContext } from "../contexts/AuthContext"; // uncomment in project
+import { AuthContext } from "../../contexts/AuthContext";
 
 const PINK = "#e91e63";
 const PINK_DARK = "#c2185b";
@@ -16,7 +16,180 @@ const PINK_LIGHT = "#FCE4EC";
 
 // ─── Notification type config ─────────────────────────────────────────────────
 const TYPE_CONFIG = {
-  // Event reminders
+  // ── Association ──────────────────────────────────────────────────────────────
+  demande_nouvelle: {
+    icon: "📋",
+    bg: "#EFF6FF",
+    color: "#2563EB",
+    border: "#BFDBFE",
+    label: "Nouvelle demande",
+  },
+  benevole_inscrit: {
+    icon: "🙋",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Bénévole inscrit",
+  },
+  proposition_acceptee: {
+    icon: "✅",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Proposition acceptée",
+  },
+  proposition_rejetee: {
+    icon: "❌",
+    bg: "#FEF2F2",
+    color: "#DC2626",
+    border: "#FECACA",
+    label: "Proposition refusée",
+  },
+  // ── Bénévole ─────────────────────────────────────────────────────────────────
+  affectation: {
+    icon: "📌",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Affectation",
+  },
+  nouvelle_action: {
+    icon: "🤝",
+    bg: "#EFF6FF",
+    color: "#2563EB",
+    border: "#BFDBFE",
+    label: "Nouvelle action",
+  },
+  participation_confirmee: {
+    icon: "✅",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Participation confirmée",
+  },
+  participation_annulee: {
+    icon: "🚫",
+    bg: "#FEF2F2",
+    color: "#DC2626",
+    border: "#FECACA",
+    label: "Participation annulée",
+  },
+  // ── Donateur ─────────────────────────────────────────────────────────────────
+  don_enregistre: {
+    icon: "🎁",
+    bg: "#FFFBEB",
+    color: "#D97706",
+    border: "#FDE68A",
+    label: "Don enregistré",
+  },
+  don_confirme: {
+    icon: "💰",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Don confirmé",
+  },
+  don_refuse: {
+    icon: "💔",
+    bg: "#FEF2F2",
+    color: "#DC2626",
+    border: "#FECACA",
+    label: "Don refusé",
+  },
+  don_suivi: {
+    icon: "📊",
+    bg: "#FFFBEB",
+    color: "#D97706",
+    border: "#FDE68A",
+    label: "Suivi du don",
+  },
+  don_reçu: {
+    icon: "💝",
+    bg: PINK_LIGHT,
+    color: PINK_DARK,
+    border: "#F48FB1",
+    label: "Don reçu",
+  },
+  // ── Administrateur ───────────────────────────────────────────────────────────
+  demande_en_attente: {
+    icon: "⏳",
+    bg: "#FFF7ED",
+    color: "#EA580C",
+    border: "#FED7AA",
+    label: "Demande en attente",
+  },
+  action_a_valider: {
+    icon: "🔍",
+    bg: "#EFF6FF",
+    color: "#2563EB",
+    border: "#BFDBFE",
+    label: "Action à valider",
+  },
+  new_user: {
+    icon: "👤",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Nouveau membre",
+  },
+  new_association: {
+    icon: "🏢",
+    bg: "#F5F3FF",
+    color: "#7C3AED",
+    border: "#DDD6FE",
+    label: "Nouvelle association",
+  },
+  activite_importante: {
+    icon: "📢",
+    bg: "#F5F3FF",
+    color: "#7C3AED",
+    border: "#DDD6FE",
+    label: "Activité importante",
+  },
+  // ── Femme malade ─────────────────────────────────────────────────────────────
+  demande_acceptee: {
+    icon: "✅",
+    bg: "#F0FDF4",
+    color: "#16A34A",
+    border: "#BBF7D0",
+    label: "Demande acceptée",
+  },
+  demande_rejetee: {
+    icon: "❌",
+    bg: "#FEF2F2",
+    color: "#DC2626",
+    border: "#FECACA",
+    label: "Demande refusée",
+  },
+  demande_en_cours: {
+    icon: "🔄",
+    bg: "#EFF6FF",
+    color: "#2563EB",
+    border: "#BFDBFE",
+    label: "Demande en cours",
+  },
+  demande_terminee: {
+    icon: "🏁",
+    bg: "#F8FAFC",
+    color: "#475569",
+    border: "#E2E8F0",
+    label: "Demande clôturée",
+  },
+  proposition_aide: {
+    icon: "💝",
+    bg: PINK_LIGHT,
+    color: PINK_DARK,
+    border: "#F48FB1",
+    label: "Proposition d'aide",
+  },
+  affectation_confirmee: {
+    icon: "🤗",
+    bg: PINK_LIGHT,
+    color: PINK_DARK,
+    border: "#F48FB1",
+    label: "Accompagnement confirmé",
+  },
+  // ── Événements ───────────────────────────────────────────────────────────────
   event_reminder: {
     icon: "📅",
     bg: "#EFF6FF",
@@ -38,75 +211,7 @@ const TYPE_CONFIG = {
     border: "#FECACA",
     label: "Aujourd'hui !",
   },
-  // New user signup (admin only)
-  new_user: {
-    icon: "👤",
-    bg: "#F0FDF4",
-    color: "#16A34A",
-    border: "#BBF7D0",
-    label: "Nouveau membre",
-  },
-  new_association: {
-    icon: "🏢",
-    bg: "#F5F3FF",
-    color: "#7C3AED",
-    border: "#DDD6FE",
-    label: "Nouvelle association",
-  },
-  // Donations (donateur + admin)
-  don_confirme: {
-    icon: "💰",
-    bg: "#FFFBEB",
-    color: "#D97706",
-    border: "#FDE68A",
-    label: "Don confirmé",
-  },
-  don_reçu: {
-    icon: "💝",
-    bg: PINK_LIGHT,
-    color: PINK_DARK,
-    border: "#F48FB1",
-    label: "Don reçu",
-  },
-  // Demandes (femme malade + admin + association)
-  demande_acceptee: {
-    icon: "✅",
-    bg: "#F0FDF4",
-    color: "#16A34A",
-    border: "#BBF7D0",
-    label: "Demande acceptée",
-  },
-  demande_rejetee: {
-    icon: "❌",
-    bg: "#FEF2F2",
-    color: "#DC2626",
-    border: "#FECACA",
-    label: "Demande refusée",
-  },
-  demande_nouvelle: {
-    icon: "📋",
-    bg: "#EFF6FF",
-    color: "#2563EB",
-    border: "#BFDBFE",
-    label: "Nouvelle demande",
-  },
-  // Affectations (bénévole)
-  affectation: {
-    icon: "📅",
-    bg: "#F0FDF4",
-    color: "#16A34A",
-    border: "#BBF7D0",
-    label: "Affectation",
-  },
-  // Propositions aide (association + femme)
-  proposition_aide: {
-    icon: "💝",
-    bg: PINK_LIGHT,
-    color: PINK_DARK,
-    border: "#F48FB1",
-    label: "Proposition d'aide",
-  },
-  // Default
+  // ── Général ──────────────────────────────────────────────────────────────────
   info: {
     icon: "ℹ️",
     bg: "#F8FAFC",
@@ -228,8 +333,7 @@ function NotificationCard({ notif, onMarkRead, onDelete }) {
 // ─── Main Notifications Page ──────────────────────────────────────────────────
 export default function Notifications() {
   const navigate = useNavigate();
-  // const { user } = useContext(AuthContext); // uncomment in project
-  const user = { role: "ADMINISTRATEUR", firstName: "Admin" }; // demo — remove in project
+  const { user } = useContext(AuthContext);
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -287,31 +391,38 @@ export default function Notifications() {
 
   // ── Filters config
   const filterConfig = [
-    { key: "all", label: "Toutes", icon: "🔔" },
-    { key: "unread", label: "Non lues", icon: "⚪" },
-    { key: "event", label: "Événements", icon: "📅" },
-    { key: "demande", label: "Demandes", icon: "📋" },
-    { key: "don", label: "Dons", icon: "💰" },
-    { key: "user", label: "Membres", icon: "👥" },
+    { key: "all",          label: "Toutes",        icon: "🔔", roles: null },
+    { key: "unread",       label: "Non lues",       icon: "⚪", roles: null },
+    { key: "demande",      label: "Demandes",       icon: "📋", roles: ["ADMINISTRATEUR", "FEMME MALADE", "ASSOCIATION"] },
+    { key: "don",          label: "Dons",           icon: "💰", roles: ["ADMINISTRATEUR", "DONTEUR"] },
+    { key: "affectation",  label: "Affectations",   icon: "📌", roles: ["BENEVOLE", "ADMINISTRATEUR", "ASSOCIATION"] },
+    { key: "action",       label: "Actions",        icon: "🤝", roles: ["BENEVOLE", "ASSOCIATION", "ADMINISTRATEUR"] },
+    { key: "proposition",  label: "Propositions",   icon: "💝", roles: ["FEMME MALADE", "ASSOCIATION", "ADMINISTRATEUR"] },
+    { key: "event",        label: "Événements",     icon: "📅", roles: null },
+    { key: "user",         label: "Membres",        icon: "👥", roles: ["ADMINISTRATEUR"] },
   ];
 
   // Only show filters relevant to the role
   const visibleFilters = filterConfig.filter((f) => {
-    if (f.key === "all" || f.key === "unread" || f.key === "event") return true;
-    if (f.key === "user" && user?.role === "ADMINISTRATEUR") return true;
-    if (f.key === "demande" && ["ADMINISTRATEUR", "FEMME MALADE", "ASSOCIATION"].includes(user?.role)) return true;
-    if (f.key === "don" && ["ADMINISTRATEUR", "DONTEUR", "FEMME MALADE"].includes(user?.role)) return true;
-    return false;
+    if (!f.roles) return true;
+    return f.roles.includes(user?.role);
   });
+
+  const FILTER_TYPES = {
+    demande:     (t) => t?.startsWith("demande"),
+    don:         (t) => t?.startsWith("don"),
+    affectation: (t) => t === "affectation" || t === "affectation_confirmee" || t === "benevole_inscrit",
+    action:      (t) => t === "nouvelle_action" || t === "action_a_valider" || t === "participation_confirmee" || t === "participation_annulee",
+    proposition: (t) => t?.startsWith("proposition"),
+    event:       (t) => t?.startsWith("event"),
+    user:        (t) => t === "new_user" || t === "new_association" || t === "activite_importante",
+  };
 
   const filteredNotifs = notifications.filter((n) => {
     if (activeFilter === "all") return true;
     if (activeFilter === "unread") return !n.lu;
-    if (activeFilter === "event") return n.type?.includes("event");
-    if (activeFilter === "demande") return n.type?.includes("demande");
-    if (activeFilter === "don") return n.type?.includes("don");
-    if (activeFilter === "user") return n.type?.includes("user") || n.type?.includes("association");
-    return true;
+    const matcher = FILTER_TYPES[activeFilter];
+    return matcher ? matcher(n.type) : true;
   });
 
   const unreadCount = notifications.filter((n) => !n.lu).length;

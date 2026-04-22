@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Card, Table, Tag, Typography, message, Empty, Spin } from "antd";
+import { App, Card, Table, Tag, Typography, Empty, Spin } from "antd";
 import { listDemandes } from "../../api/demandes";
 import { AuthContext } from "../../contexts/AuthContext";
 
@@ -34,6 +34,7 @@ const typeColor = {
 };
 
 const DemandesList = () => {
+  const { message } = App.useApp();
   const [loading, setLoading] = useState(true);
   const [demandes, setDemandes] = useState([]);
   const { user } = useContext(AuthContext);

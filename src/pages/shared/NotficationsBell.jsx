@@ -7,19 +7,41 @@ import { listNotifications, markAsRead } from "../../api/notifications";
 const PINK = "#f7078b";
 
 const TYPE_ICONS = {
-  event_today: "🔔",
-  event_tomorrow: "⏰",
-  event_reminder: "📅",
-  new_user: "👤",
-  new_association: "🏢",
-  don_confirme: "💰",
-  don_reçu: "💝",
-  demande_acceptee: "✅",
-  demande_rejetee: "❌",
-  demande_nouvelle: "📋",
-  affectation: "📅",
-  proposition_aide: "💝",
-  info: "ℹ️",
+  // Association
+  demande_nouvelle:      "📋",
+  benevole_inscrit:      "🙋",
+  proposition_acceptee:  "✅",
+  proposition_rejetee:   "❌",
+  // Bénévole
+  affectation:           "📌",
+  nouvelle_action:       "🤝",
+  participation_confirmee: "✅",
+  participation_annulee: "🚫",
+  // Donateur
+  don_enregistre:        "🎁",
+  don_confirme:          "💰",
+  don_refuse:            "💔",
+  don_suivi:             "📊",
+  don_reçu:              "💝",
+  // Administrateur
+  demande_en_attente:    "⏳",
+  action_a_valider:      "🔍",
+  new_user:              "👤",
+  new_association:       "🏢",
+  activite_importante:   "📢",
+  // Femme malade
+  demande_acceptee:      "✅",
+  demande_rejetee:       "❌",
+  demande_en_cours:      "🔄",
+  demande_terminee:      "🏁",
+  proposition_aide:      "💝",
+  affectation_confirmee: "🤗",
+  // Événements
+  event_today:           "🔔",
+  event_tomorrow:        "⏰",
+  event_reminder:        "📅",
+  // Général
+  info:                  "ℹ️",
 };
 
 function timeAgo(dateStr) {

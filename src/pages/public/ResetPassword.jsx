@@ -1,9 +1,10 @@
 import React from "react";
-import { Button, Col, Divider, Form, Input, Row, message } from "antd";
+import { App, Button, Col, Divider, Form, Input, Row } from "antd";
 import { useNavigate, useParams } from "react-router-dom";
 import { resetPassword } from "../../api/auth";
 
 function ResetPassword() {
+  const { message } = App.useApp();
   const { token } = useParams();
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -36,11 +37,11 @@ function ResetPassword() {
             boxShadow: "rgba(100, 100, 111, 0.2) 0px 7px 29px 0px",
           }}
         >
-          <Divider>Reset Password</Divider>
+          <Divider>oublier le mot de passe</Divider>
 
           <Form form={form} layout="vertical" onFinish={onFinish}>
             <Form.Item
-              label="Password"
+              label="Nouveau mot de passe"
               name="newPassword"
               rules={[
                 { required: true, message: "Password is required" },
@@ -51,7 +52,7 @@ function ResetPassword() {
             </Form.Item>
 
             <Form.Item
-              label="Confirm Password"
+              label="Confirmer le nouveau mot de passe"
               name="confirmNewPassword"
               dependencies={["newPassword"]}
               rules={[
@@ -73,7 +74,7 @@ function ResetPassword() {
 
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <Button type="primary" htmlType="submit">
-                Reset
+                   Envoyer
               </Button>
             </div>
           </Form>

@@ -1,13 +1,24 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
-import { listDons } from "../../api/dons";
-import { listPropositionsAide } from "../../api/propositionsAide";
+import { listDons, getDonatorStats, getDonatorPropositions } from "../../api/dons";
 import { App as AntApp } from "antd";
 
 const GOLD = "#F59E0B";
 const GOLD_DARK = "#D97706";
 const GOLD_LIGHT = "#fffbeb";
+
+const DON_STATUS_LABEL = {
+  EN_ATTENTE: "En attente",
+  CONFIRME: "Confirmé",
+  REFUSE: "Refusé",
+};
+
+const PROPOSITION_STATUS_LABEL = {
+  PROPOSEE: "Proposée",
+  ACCEPTEE: "Acceptée",
+  REFUSEE: "Refusée",
+};
 
 const styles = {
   page: { fontFamily: "'Sora', system-ui, sans-serif", paddingBottom: 40, color: "#1a1a1a" },
@@ -126,6 +137,7 @@ export default function DonateurDashboard() {
   const navigate = useNavigate();
   const [dons, setDons] = useState([]);
   const [propositionsLiees, setPropositionsLiees] = useState([]);
+  const [backendStats, setBackendStats] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const formatAmount = (n) =>
@@ -136,9 +148,10 @@ export default function DonateurDashboard() {
       try {
         setLoading(true);
         const userId = user?._id || user?.id;
-        const [donsRes, propositionsRes] = await Promise.all([
+        const [donsRes, propositionsRes, statsRes] = await Promise.all([
           listDons(userId ? { donateur: userId } : {}),
-          listPropositionsAide(),
+          getDonatorPropositions(),
+          getDonatorStats(),
         ]);
 
         const data = Array.isArray(donsRes?.data?.dons) ? donsRes.data.dons : [];
@@ -147,26 +160,16 @@ export default function DonateurDashboard() {
           : data;
         setDons(filtered);
 
-        const demandeIdsFinancees = new Set(
-          filtered
-            .map((d) => (d?.demande?._id || d?.demande || "").toString())
-            .filter(Boolean)
-        );
-
         const allPropositions = Array.isArray(propositionsRes?.data?.propositions)
           ? propositionsRes.data.propositions
           : [];
-
-        const liees = allPropositions.filter((p) => {
-          const demandeId = (p?.demande?._id || p?.demande || "").toString();
-          return demandeIdsFinancees.has(demandeId);
-        });
-
-        setPropositionsLiees(liees);
+        setPropositionsLiees(allPropositions);
+        setBackendStats(statsRes?.data?.stats || null);
       } catch {
         message.error("Impossible de charger les dons pour le moment.");
         setDons([]);
         setPropositionsLiees([]);
+        setBackendStats(null);
       } finally {
         setLoading(false);
       }
@@ -178,19 +181,18 @@ export default function DonateurDashboard() {
   }, [user]);
 
   const stats = useMemo(() => {
-    const totalMontant = dons.reduce((sum, d) => sum + (Number(d?.montant) || 0), 0);
-    const donsEffectues = dons.length;
-    const demandesFinancees = new Set(
+    const totalMontant = backendStats?.totalMontant ?? dons.reduce((sum, d) => sum + (Number(d?.montant) || 0), 0);
+    const donsEffectues = backendStats?.totalDons ?? dons.length;
+
+    // Use server-computed accurate values when available, fall back to client logic
+    const femmesAidees = backendStats?.femmesAidees ?? new Set(
       dons
-        .map((d) => (d?.demande?._id || d?.demande || "").toString())
-        .filter(Boolean)
-    ).size;
-    const femmesAidees = new Set(
-      dons
+        .filter((d) => d?.statut === 'CONFIRME')
         .map((d) => (d?.demande?.femme?._id || d?.demande?.femme || "").toString())
         .filter(Boolean)
     ).size;
-    const propositionsRecues = propositionsLiees.length;
+
+    const propositionsRecues = backendStats?.propositionsLiees ?? propositionsLiees.length;
 
     let rang = "Bronze";
     if (totalMontant >= 3000) rang = "Or";
@@ -222,7 +224,7 @@ export default function DonateurDashboard() {
     ];
 
     return { totalMontant, donsEffectues, rang, statCards, impact };
-  }, [dons, propositionsLiees]);
+  }, [dons, propositionsLiees, backendStats]);
 
   const recentDons = useMemo(
     () =>
@@ -233,7 +235,7 @@ export default function DonateurDashboard() {
         beneficiaire: d?.demande?.titre || "Demande generale",
         montant: Number(d?.montant) || 0,
         type: d?.type || "-",
-        statut: d?.statut === "CONFIRME" ? "CONFIRME" : "EN_ATTENTE",
+        statut: d?.statut || "EN_ATTENTE",
       })),
     [dons]
   );
@@ -329,7 +331,13 @@ export default function DonateurDashboard() {
                       <span style={styles.typePill(d.type === "FINANCIER" ? GOLD : "#3b82f6")}>{d.type}</span>
                     </td>
                     <td style={styles.td}>
-                      <span style={d.statut === "CONFIRME" ? styles.confirmedPill : styles.pendingPill}>{d.statut}</span>
+                      <span style={
+                        d.statut === "CONFIRME"
+                          ? styles.confirmedPill
+                          : d.statut === "REFUSE"
+                          ? { background: "#fef2f2", color: "#b91c1c", borderRadius: 6, padding: "3px 10px", fontSize: 11, fontWeight: 600 }
+                          : styles.pendingPill
+                      }>{DON_STATUS_LABEL[d.statut] || d.statut}</span>
                     </td>
                   </tr>
                 ))}
@@ -389,7 +397,7 @@ export default function DonateurDashboard() {
                         <span style={styles.propositionTitle}>{p.titreDemande}</span>
                         <span style={styles.propositionMeta}>📅 {p.date} · {p.description}</span>
                       </div>
-                      <span style={statusStyle}>{p.statut}</span>
+                      <span style={statusStyle}>{PROPOSITION_STATUS_LABEL[p.statut] || p.statut}</span>
                     </div>
                   );
                 })

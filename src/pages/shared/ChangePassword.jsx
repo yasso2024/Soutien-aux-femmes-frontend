@@ -1,9 +1,10 @@
 import React from "react";
-import { Button, Divider, Form, Input, message } from "antd";
+import { App, Button, Divider, Form, Input } from "antd";
 import { useNavigate } from "react-router-dom";
 import { changePassword } from "../../api/auth";
 
 const ChangePassword = () => {
+  const { message } = App.useApp();
   const [form] = Form.useForm();
   const navigate = useNavigate();
 

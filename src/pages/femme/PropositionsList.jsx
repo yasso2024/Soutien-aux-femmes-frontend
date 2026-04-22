@@ -1,10 +1,9 @@
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Avatar, message } from 'antd';
+import { App, Avatar } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { AuthContext } from '../../contexts/AuthContext';
 import { changePropositionAideStatus, listPropositionsAide, deletePropositionAide } from '../../api/propositionsAide';
-import { listDemandes } from '../../api/demandes';
 
 const TEAL = '#0F9488';
 const TEAL_LIGHT = '#E1F5EE';
@@ -376,6 +375,7 @@ function PropositionCard({ item, user, onDelete, onChangeStatus, updatingStatus 
 }
 
 export default function PropositionsAideList() {
+  const { message } = App.useApp();
   const [propositions, setPropositions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('Toutes');
@@ -388,31 +388,13 @@ export default function PropositionsAideList() {
     async function fetchData() {
       setLoading(true);
       try {
-        const [demandesResponse, propositionsResponse] = await Promise.all([
-          listDemandes(user?._id ? { femme: user._id } : {}),
-          listPropositionsAide(),
-        ]);
-
-        const demandes = Array.isArray(demandesResponse?.data?.demandes)
-          ? demandesResponse.data.demandes
-          : [];
-
-        const demandeIds = new Set(
-          demandes
-            .map((demande) => (demande?._id || demande?.id || '').toString())
-            .filter(Boolean)
-        );
+        const propositionsResponse = await listPropositionsAide();
 
         const propositions = Array.isArray(propositionsResponse?.data?.propositions)
           ? propositionsResponse.data.propositions
           : [];
 
-        setPropositions(
-          propositions.filter((proposition) => {
-            const demandeId = (proposition?.demande?._id || proposition?.demande || '').toString();
-            return demandeIds.has(demandeId);
-          })
-        );
+        setPropositions(propositions);
       } catch (error) {
         console.error(error.message || 'Erreur lors du chargement');
         setPropositions([]);

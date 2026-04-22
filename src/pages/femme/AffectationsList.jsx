@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Card, List, Button, Tag, Modal, Empty, Spin, message, Typography, Avatar, Divider } from "antd";
+import { App, Card, Button, Tag, Modal, Empty, Spin, Typography, Avatar, Divider } from "antd";
 import { ArrowLeftOutlined, CheckCircleOutlined, CloseCircleOutlined, ClockCircleOutlined, UserOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
@@ -23,6 +23,7 @@ const STATUS_LABELS = {
 };
 
 export default function AffectationsListFemme() {
+  const { message } = App.useApp();
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [affectations, setAffectations] = useState([]);
@@ -46,13 +47,8 @@ export default function AffectationsListFemme() {
         ? response
         : [];
 
-      // Filtrer pour les affectations liées aux demandes de cette femme
-      const femmeAffectations = allAffectations.filter((aff) => {
-        // Vérifier si l'affectation est liée à une demande de cette femme
-        return aff?.demande || aff?.femmeMalade?.toString() === user?._id?.toString();
-      });
-
-      setAffectations(femmeAffectations);
+      // Backend already filters by femme's demandes for FEMME MALADE role
+      setAffectations(allAffectations);
     } catch (error) {
       message.error("Erreur lors du chargement des affectations");
       setAffectations([]);
@@ -113,10 +109,10 @@ export default function AffectationsListFemme() {
           </Empty>
         </Card>
       ) : (
-        <List
-          dataSource={affectations}
-          renderItem={(affectation) => (
+        <div>
+          {affectations.map((affectation) => (
             <Card
+              key={affectation._id || affectation.id}
               style={{ marginBottom: 16, cursor: "pointer" }}
               hoverable
               onClick={() => handleViewDetails(affectation)}
@@ -194,8 +190,8 @@ export default function AffectationsListFemme() {
                 </div>
               </div>
             </Card>
-          )}
-        />
+          ))}
+        </div>
       )}
 
       {/* Modal de détails */}

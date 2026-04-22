@@ -62,246 +62,364 @@ const quizByAge = {
 };
 
 const css = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Serif+Display&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=DM+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
-  * { box-sizing: border-box; margin: 0; padding: 0; }
+  * { box-sizing: border-box; }
 
   .qz-root {
     min-height: 100vh;
-    background: #FDF6F0;
-    font-family: 'DM Sans', sans-serif;
-    padding: 40px 20px;
+    background: linear-gradient(160deg, #FFF0F5 0%, #FFF8F4 50%, #FDF6F0 100%);
+    font-family: 'DM Sans', 'Segoe UI', sans-serif;
   }
 
-  
-  .qz-hint {
-    margin-top: -10px;
-    margin-bottom: 18px;
-    font-size: 13px;
-    color: #7b6873;
-    line-height: 1.5;
-    background: #fff7fb;
-    border: 1px solid #f2dde8;
-    border-radius: 12px;
-    padding: 10px 12px;
-  }
-  .qz-wrap {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-
-  
-  .qz-opt:disabled {
-    cursor: not-allowed;
-    opacity: 0.7;
-  }
-  
-  .qz-opt-ok {
-    border-color: #22c55e !important;
-    background: #f0fdf4 !important;
-    color: #166534 !important;
-  }
-  
-  .qz-opt-ko {
-    border-color: #ef4444 !important;
-    background: #fef2f2 !important;
-    color: #b91c1c !important;
-  }
-  .qz-header {
+  .qz-hero {
+    background: linear-gradient(135deg, #7C2D52 0%, #C2185B 60%, #E91E63 100%);
+    padding: 40px 20px 52px;
     text-align: center;
-    margin-bottom: 30px;
+    position: relative;
+  }
+
+  .qz-hero::before {
+    content: '';
+    position: absolute;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    top: -80px; left: -60px;
+    pointer-events: none;
+  }
+
+  .qz-hero::after {
+    content: '';
+    position: absolute;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+    bottom: -50px; right: -30px;
+    pointer-events: none;
+  }
+
+  .qz-hero-badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 999px;
+    padding: 4px 16px;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.9);
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    position: relative;
+    z-index: 1;
   }
 
   .qz-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 42px;
-    color: #1a0a12;
-    margin-bottom: 10px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 44px;
+    font-weight: 900;
+    color: #fff;
+    margin: 0 0 12px;
+    line-height: 1.1;
+    position: relative;
+    z-index: 1;
   }
 
   .qz-sub {
     font-size: 15px;
-    color: #6f5965;
-    line-height: 1.6;
+    color: rgba(255,255,255,0.82);
+    line-height: 1.65;
+    max-width: 420px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    font-style: italic;
+  }
+
+  .qz-wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 20px 80px;
+    position: relative;
+    z-index: 2;
   }
 
   .qz-age-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-top: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
   }
 
   .qz-age-card {
-    background: white;
-    border: 1px solid #f2dde8;
-    border-radius: 18px;
-    padding: 22px;
+    background: #fff;
+    border: 1.5px solid #f5e0ec;
+    border-radius: 24px;
+    padding: 28px 24px;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 24px rgba(194,24,91,0.07);
+    text-align: left;
   }
 
   .qz-age-card:hover {
-    border-color: #EC7FA7;
-    transform: translateY(-2px);
+    border-color: #E91E63;
+    transform: translateY(-8px);
+    box-shadow: 0 24px 64px rgba(194,24,91,0.18);
+  }
+
+  .qz-age-emoji {
+    font-size: 36px;
+    margin-bottom: 12px;
+    display: block;
   }
 
   .qz-age-title {
-    font-size: 20px;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
     font-weight: 700;
     margin-bottom: 8px;
-    color: #231019;
+    color: #7C2D52;
   }
 
   .qz-age-desc {
     font-size: 14px;
-    color: #6e5864;
-    line-height: 1.5;
+    color: #7a5868;
+    line-height: 1.6;
+    margin-bottom: 18px;
+  }
+
+  .qz-age-arrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #E91E63;
   }
 
   .qz-progress {
-    margin-bottom: 20px;
+    margin-bottom: 24px;
   }
 
   .qz-progress-top {
     display: flex;
     justify-content: space-between;
     font-size: 13px;
-    color: #C4547D;
+    color: #7C2D52;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
   }
 
   .qz-progress-bar {
-    height: 8px;
-    background: #f1e5ec;
+    height: 10px;
+    background: rgba(194,24,91,0.1);
     border-radius: 999px;
     overflow: hidden;
   }
 
   .qz-progress-fill {
     height: 100%;
-    background: linear-gradient(90deg, #EC7FA7, #C4547D);
-    transition: width 0.35s ease;
+    background: linear-gradient(90deg, #E91E63, #7C2D52);
+    transition: width 0.4s ease;
+    border-radius: 999px;
   }
 
   .qz-card {
-    background: white;
-    border: 1px solid #f2dde8;
-    border-radius: 22px;
-    padding: 28px;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.04);
+    background: #fff;
+    border-radius: 28px;
+    padding: 40px 36px;
+    box-shadow: 0 12px 48px rgba(194,24,91,0.10), 0 2px 8px rgba(0,0,0,0.04);
   }
 
   .qz-num {
-    font-size: 12px;
-    color: #EC7FA7;
+    font-size: 11px;
+    color: #E91E63;
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 10px;
+    letter-spacing: 0.12em;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .qz-num::before {
+    content: '';
+    width: 28px;
+    height: 2px;
+    background: linear-gradient(90deg, #E91E63, transparent);
+    display: inline-block;
+    border-radius: 2px;
   }
 
   .qz-q {
-    font-size: 20px;
-    font-weight: 600;
-    color: #1d0f17;
-    line-height: 1.6;
-    margin-bottom: 22px;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: #1d0a14;
+    line-height: 1.55;
+    margin-bottom: 20px;
+  }
+
+  .qz-hint {
+    margin-bottom: 30px;
+    font-size: 13.5px;
+    color: #8c6472;
+    line-height: 1.65;
+    background: linear-gradient(135deg, #FFF5F9, #FFF0F5);
+    border-left: 3px solid #E91E63;
+    border-radius: 0 14px 14px 0;
+    padding: 12px 18px;
   }
 
   .qz-opts {
     display: flex;
-    gap: 14px;
+    gap: 16px;
   }
 
   .qz-opt {
     flex: 1;
-    border: 1.5px solid #eddce7;
+    border: 2px solid #f0dce6;
     background: #fdf8fb;
-    border-radius: 14px;
-    padding: 14px;
-    font-size: 15px;
+    border-radius: 16px;
+    padding: 18px 12px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
-    transition: 0.2s;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    color: #4a2535;
+    letter-spacing: 0.02em;
   }
 
-  .qz-opt:hover {
-    border-color: #EC7FA7;
-    background: #fff1f7;
-    color: #C4547D;
+  .qz-opt:hover:not(:disabled) {
+    border-color: #E91E63;
+    background: linear-gradient(135deg, #FFF0F5, #FFE4EE);
+    color: #C2185B;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(233,30,99,0.15);
+  }
+
+  .qz-opt:disabled { cursor: not-allowed; }
+
+  .qz-opt-ok {
+    border-color: #22c55e !important;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7) !important;
+    color: #166534 !important;
+    box-shadow: 0 4px 16px rgba(34,197,94,0.2) !important;
+  }
+
+  .qz-opt-ko {
+    border-color: #ef4444 !important;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2) !important;
+    color: #991b1b !important;
+    box-shadow: 0 4px 16px rgba(239,68,68,0.18) !important;
   }
 
   .qz-result {
-    background: linear-gradient(135deg, #1a0a12, #341924);
-    color: white;
-    border-radius: 24px;
-    padding: 36px 24px;
+    background: linear-gradient(145deg, #2d0a1e, #5a1035, #7C2D52);
+    color: #fff;
+    border-radius: 32px;
+    padding: 52px 40px;
     text-align: center;
+    box-shadow: 0 20px 64px rgba(124,45,82,0.4);
   }
 
   .qz-score {
-    font-size: 64px;
-    font-family: 'DM Serif Display', serif;
-    color: #EC7FA7;
-    margin-bottom: 8px;
+    font-family: 'Playfair Display', serif;
+    font-size: 88px;
+    font-weight: 900;
+    background: linear-gradient(135deg, #FFD6E5, #FF94BF, #FF6BA8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+
+  .qz-score-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.55);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .qz-risk-badge {
+    display: inline-block;
+    padding: 8px 22px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    letter-spacing: 0.04em;
   }
 
   .qz-msg {
-    font-size: 18px;
-    line-height: 1.5;
-    margin-top: 10px;
-    margin-bottom: 20px;
+    font-size: 15px;
+    line-height: 1.75;
+    margin-bottom: 28px;
+    color: rgba(255,255,255,0.85);
+    max-width: 380px;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   .qz-list {
     text-align: left;
     background: rgba(255,255,255,0.08);
-    padding: 18px;
-    border-radius: 16px;
-    margin-top: 18px;
+    padding: 20px 24px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    border: 1px solid rgba(255,255,255,0.1);
   }
 
   .qz-list-title {
-    color: #EC7FA7;
+    color: #FFD6E5;
     font-weight: 700;
-    margin-bottom: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
   }
 
   .qz-item {
     margin-bottom: 8px;
-    line-height: 1.5;
+    line-height: 1.6;
     font-size: 14px;
+    color: rgba(255,255,255,0.82);
   }
 
   .qz-btn {
-    margin-top: 22px;
+    margin-top: 28px;
     border: none;
-    background: #EC7FA7;
-    color: white;
-    border-radius: 12px;
-    padding: 12px 24px;
+    background: linear-gradient(135deg, #E91E63, #C2185B);
+    color: #fff;
+    border-radius: 16px;
+    padding: 16px 40px;
     font-weight: 700;
+    font-size: 15px;
     cursor: pointer;
+    box-shadow: 0 8px 28px rgba(233,30,99,0.4);
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    letter-spacing: 0.02em;
   }
 
   .qz-btn:hover {
-    background: #d96590;
+    transform: translateY(-3px);
+    box-shadow: 0 14px 40px rgba(233,30,99,0.5);
   }
 
   @media (max-width: 640px) {
-    .qz-opts {
-      flex-direction: column;
-    }
-
-    .qz-title {
-      font-size: 32px;
-    }
-
-    .qz-q {
-      font-size: 18px;
-    }
+    .qz-opts { flex-direction: column; }
+    .qz-title { font-size: 32px; }
+    .qz-q { font-size: 19px; }
+    .qz-score { font-size: 64px; }
+    .qz-card { padding: 28px 22px; }
+    .qz-result { padding: 40px 24px; }
   }
 `;
 
@@ -382,61 +500,66 @@ export default function BreastQuizOneByOne() {
       <style>{css}</style>
 
       <div className="qz-root">
+        {/* Hero */}
+        <div className="qz-hero">
+          <div className="qz-hero-badge">🌸 PRÉVENTION CANCER DU SEIN</div>
+          <h1 className="qz-title">Quiz de prévention</h1>
+          <p className="qz-sub">
+            Évaluez vos habitudes et découvrez vos points d'amélioration.<br />
+            Répondez honnêtement pour des conseils personnalisés.
+          </p>
+        </div>
+
         <div className="qz-wrap">
-          <div className="qz-header">
-            <h1 className="qz-title">Quiz prévention</h1>
-            <p className="qz-sub">
-              Les questions changent automatiquement après chaque réponse.
-            </p>
-          </div>
 
           {!ageGroup ? (
             <div className="qz-age-grid">
               <button className="qz-age-card" onClick={() => handleAgeSelect("18-30")}>
+                <span className="qz-age-emoji">🌱</span>
                 <div className="qz-age-title">18 – 30 ans</div>
                 <div className="qz-age-desc">
-                  Questions sur la prévention, l’alimentation et l’auto-surveillance.
+                  Prévention, alimentation saine et gestes d'auto-surveillance au quotidien.
                 </div>
+                <div className="qz-age-arrow">Commencer le quiz →</div>
               </button>
-
               <button className="qz-age-card" onClick={() => handleAgeSelect("30-45")}>
+                <span className="qz-age-emoji">🌺</span>
                 <div className="qz-age-title">30 – 45 ans</div>
                 <div className="qz-age-desc">
-                  Questions sur le suivi médical, les signes d’alerte et les facteurs de risque.
+                  Suivi médical, signes d'alerte et facteurs de risque à connaître.
                 </div>
+                <div className="qz-age-arrow">Commencer le quiz →</div>
               </button>
             </div>
           ) : finished ? (
             <div className="qz-result">
               <div className="qz-score">{finalScore}/{questions.length}</div>
-              <div className="qz-msg">
-                {getRisk(finalScore, questions.length)} — {getMessage(finalScore, questions.length)}
-              </div>
+              <div className="qz-score-label">Score de prévention</div>
+              <div className="qz-risk-badge">{getRisk(finalScore, questions.length)}</div>
+              <p className="qz-msg">{getMessage(finalScore, questions.length)}</p>
 
               <div className="qz-list">
                 <div className="qz-list-title">Que faire</div>
-                <div className="qz-item">• Faire une auto-palpation régulièrement</div>
+                <div className="qz-item">• Faire une auto-palpation une fois par mois</div>
                 <div className="qz-item">• Consulter un médecin si vous remarquez un changement</div>
-                <div className="qz-item">• Faire un suivi médical si vous avez des antécédents</div>
+                <div className="qz-item">• Renforcer le suivi médical si vous avez des antécédents</div>
               </div>
 
               <div className="qz-list">
                 <div className="qz-list-title">Quoi manger</div>
-                <div className="qz-item">• Fruits et légumes</div>
-                <div className="qz-item">• Poisson, légumineuses, noix</div>
+                <div className="qz-item">• Fruits et légumes frais variés</div>
+                <div className="qz-item">• Poisson, légumineuses et noix</div>
                 <div className="qz-item">• Réduire sucre, friture, alcool et tabac</div>
               </div>
 
-              <button className="qz-btn" onClick={resetQuiz}>
-                Recommencer
-              </button>
+              <button className="qz-btn" onClick={resetQuiz}>↺ Recommencer le quiz</button>
             </div>
           ) : (
             <>
               <div className="qz-progress">
                 <div className="qz-progress-top">
                   <span>{quizByAge[ageGroup].label}</span>
-                  <span>Question {currentQuestion + 1}/{questions.length}</span>
+                  <span>Question {currentQuestion + 1} / {questions.length}</span>
                 </div>
                 <div className="qz-progress-bar">
                   <div
@@ -447,40 +570,20 @@ export default function BreastQuizOneByOne() {
               </div>
 
               <div className="qz-card">
-                <div className="qz-num">
-                  Question {currentQuestion + 1}
-                </div>
-
-                <div className="qz-q">
-                  {questions[currentQuestion].question}
-                </div>
-
-                <div className="qz-hint">
-                  {questions[currentQuestion].hint}
-                </div>
+                <div className="qz-num">Question {currentQuestion + 1}</div>
+                <div className="qz-q">{questions[currentQuestion].question}</div>
+                <div className="qz-hint">{questions[currentQuestion].hint}</div>
 
                 <div className="qz-opts">
                   <button
-                    className={`qz-opt ${
-                      selectedAnswer === "oui"
-                        ? questions[currentQuestion].answer === "oui"
-                          ? "qz-opt-ok"
-                          : "qz-opt-ko"
-                        : ""
-                    }`}
+                    className={`qz-opt ${selectedAnswer === "oui" ? questions[currentQuestion].answer === "oui" ? "qz-opt-ok" : "qz-opt-ko" : ""}`}
                     onClick={() => handleAnswer("oui")}
                     disabled={locked}
                   >
                     ✓ Oui
                   </button>
                   <button
-                    className={`qz-opt ${
-                      selectedAnswer === "non"
-                        ? questions[currentQuestion].answer === "non"
-                          ? "qz-opt-ok"
-                          : "qz-opt-ko"
-                        : ""
-                    }`}
+                    className={`qz-opt ${selectedAnswer === "non" ? questions[currentQuestion].answer === "non" ? "qz-opt-ok" : "qz-opt-ko" : ""}`}
                     onClick={() => handleAnswer("non")}
                     disabled={locked}
                   >
