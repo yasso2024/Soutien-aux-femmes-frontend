@@ -24,6 +24,7 @@ const menuConfig = {
   ADMINISTRATEUR: [
     { key: "/admin/dashboard", label: "Home", icon: "📊" },
     { key: "/admin/utilisateurs", label: "Utilisateurs", icon: "👥" },
+    { key: "/admin/actions-solidaires", label: "Actions solidaires", icon: "🤝" },
     { key: "/admin/demandes", label: "Demandes", icon: "📋" },
     { key: "/admin/propositions-aide", label: "Propositions", icon: "💝" },
     { key: "/admin/dons", label: "Dons", icon: "💰" },

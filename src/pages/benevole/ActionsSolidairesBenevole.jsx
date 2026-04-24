@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../contexts/AuthContext";
-import { listActionsSolidaires, participerAction } from "../../api/actionSolidaires";
+import { listActionsSolidaires, participerAction, quitterAction } from "../../api/actionSolidaires";
 
 const PURPLE = "#8B5CF6";
 const PURPLE_DARK = "#6D28D9";
@@ -81,12 +81,26 @@ const FILTERS = [
   { key: "MES",      label: "Mes participations" },
 ];
 
+// ─── derive effective statut (same logic as stats) ─────────────────────────
+function getEffectiveStatutCard(action) {
+  if (action?.statut && action.statut !== "EN_ATTENTE") return action.statut;
+  if (!action?.dateAction) return "EN_ATTENTE";
+  const d = new Date(action.dateAction);
+  if (Number.isNaN(d.getTime())) return "EN_ATTENTE";
+  const endOfDay = new Date(d);
+  endOfDay.setHours(23, 59, 59, 999);
+  return endOfDay < new Date() ? "TERMINEE" : "EN_ATTENTE";
+}
+
 // ─── ActionCard ──────────────────────────────────────────────────────────────
-function ActionCard({ action, userId, onParticiper, joining }) {
+function ActionCard({ action, userId, onParticiper, onQuitter, joining, leaving }) {
   const [hovered, setHovered] = useState(false);
-  const cfg = STATUT[action.statut] || STATUT.EN_ATTENTE;
+  const statut = getEffectiveStatutCard(action);
+  const cfg = STATUT[statut] || STATUT.EN_ATTENTE;
   const already = isAlreadyIn(action, userId);
-  const canJoin = action.statut === "VALIDEE" && !already;
+  const isDisponible = statut === "VALIDEE" || statut === "EN_ATTENTE";
+  const canJoin = isDisponible && !already;
+  const canLeave = already;
 
   const assocName =
     action.association
@@ -172,14 +186,34 @@ function ActionCard({ action, userId, onParticiper, joining }) {
         </div>
 
         {already ? (
-          <span style={{
-            display: "inline-flex", alignItems: "center", gap: 5,
-            background: PURPLE_LIGHT, color: PURPLE_DARK,
-            borderRadius: 99, padding: "6px 13px",
-            fontSize: 12, fontWeight: 700,
-          }}>
-            <IconCheck /> Inscrit
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <span style={{
+              display: "inline-flex", alignItems: "center", gap: 5,
+              background: PURPLE_LIGHT, color: PURPLE_DARK,
+              borderRadius: 99, padding: "6px 13px",
+              fontSize: 12, fontWeight: 700,
+            }}>
+              <IconCheck /> Inscrit
+            </span>
+            {canLeave && (
+              <button
+                disabled={leaving === action._id}
+                onClick={(e) => { e.stopPropagation(); onQuitter(action._id); }}
+                style={{
+                  background: leaving === action._id ? "#e5e7eb" : "#FEF2F2",
+                  color: leaving === action._id ? "#6b7280" : "#DC2626",
+                  border: "1px solid #FECACA",
+                  borderRadius: 10,
+                  padding: "7px 13px", fontSize: 12, fontWeight: 600,
+                  cursor: leaving === action._id ? "not-allowed" : "pointer",
+                  transition: "background 0.15s",
+                  fontFamily: "inherit",
+                }}
+              >
+                {leaving === action._id ? "..." : "❌ Se désinscrire"}
+              </button>
+            )}
+          </div>
         ) : canJoin ? (
           <button
             disabled={joining === action._id}
@@ -212,6 +246,7 @@ export default function ActionsSolidairesBenevole() {
   const [filter, setFilter] = useState("TOUTES");
   const [search, setSearch] = useState("");
   const [joining, setJoining] = useState(null);
+  const [leaving, setLeaving] = useState(null);
   const [toast, setToast] = useState(null);
 
   const userId = user?._id || user?.id || "";
@@ -226,8 +261,9 @@ export default function ActionsSolidairesBenevole() {
     try {
       const res = await listActionsSolidaires();
       setActions(Array.isArray(res?.data?.actions) ? res.data.actions : []);
-    } catch {
+    } catch (err) {
       setActions([]);
+      showToast(err?.message || "Impossible de charger les actions. Vérifiez la connexion au serveur.", false);
     } finally {
       setLoading(false);
     }
@@ -248,10 +284,46 @@ export default function ActionsSolidairesBenevole() {
     }
   }
 
+  async function handleLeave(id) {
+    setLeaving(id);
+    // optimistic update — remove user from benevoles immediately
+    setActions((prev) =>
+      prev.map((a) =>
+        a._id === id
+          ? { ...a, benevoles: (a.benevoles || []).filter((b) => String(b?._id || b) !== String(userId)) }
+          : a
+      )
+    );
+    try {
+      await quitterAction(id);
+      showToast("✅ Désinscription effectuée");
+      await fetchActions();
+    } catch (err) {
+      // rollback on error
+      await fetchActions();
+      showToast(err.message || "Erreur lors de la désinscription", false);
+    } finally {
+      setLeaving(null);
+    }
+  }
+
   // ── computed stats ──────────────────────────────────────────────────────
+  function getEffectiveStatut(action) {
+    if (action?.statut && action.statut !== "EN_ATTENTE") return action.statut;
+    if (!action?.dateAction) return "EN_ATTENTE";
+    const d = new Date(action.dateAction);
+    if (Number.isNaN(d.getTime())) return "EN_ATTENTE";
+    const endOfDay = new Date(d);
+    endOfDay.setHours(23, 59, 59, 999);
+    return endOfDay < new Date() ? "TERMINEE" : "EN_ATTENTE";
+  }
+
   const mesParticipations = actions.filter((a) => isAlreadyIn(a, userId));
-  const disponibles = actions.filter((a) => a.statut === "VALIDEE" && !isAlreadyIn(a, userId));
-  const terminees = actions.filter((a) => a.statut === "TERMINEE");
+  const disponibles = actions.filter((a) => {
+    const s = getEffectiveStatut(a);
+    return (s === "VALIDEE" || s === "EN_ATTENTE") && !isAlreadyIn(a, userId);
+  });
+  const terminees = actions.filter((a) => getEffectiveStatut(a) === "TERMINEE");
 
   const STAT_CARDS = [
     { label: "Mes participations", value: mesParticipations.length, icon: "🏅", color: PURPLE },
@@ -262,8 +334,11 @@ export default function ActionsSolidairesBenevole() {
 
   // ── filter + search ─────────────────────────────────────────────────────
   let displayed = actions;
-  if (filter === "VALIDEE")  displayed = actions.filter((a) => a.statut === "VALIDEE");
-  if (filter === "TERMINEE") displayed = actions.filter((a) => a.statut === "TERMINEE");
+  if (filter === "VALIDEE")  displayed = actions.filter((a) => {
+    const s = getEffectiveStatut(a);
+    return s === "VALIDEE" || s === "EN_ATTENTE";
+  });
+  if (filter === "TERMINEE") displayed = actions.filter((a) => getEffectiveStatut(a) === "TERMINEE");
   if (filter === "MES")      displayed = mesParticipations;
 
   if (search.trim()) {
@@ -457,7 +532,9 @@ export default function ActionsSolidairesBenevole() {
               action={action}
               userId={userId}
               onParticiper={handleJoin}
+              onQuitter={handleLeave}
               joining={joining}
+              leaving={leaving}
             />
           ))}
         </div>

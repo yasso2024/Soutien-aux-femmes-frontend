@@ -24,6 +24,7 @@ import NotificationsList from "./pages/shared/NotificationsList";
 
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminUtilisateurs from "./pages/admin/AdminUtilisateurs";
+import AdminActionsSolidaires from "./pages/admin/AdminActionsSolidaires";
 
 import FemmeDashboard from "./pages/femme/FemmeDashboard";
 import DemandesList from "./pages/femme/DemandesList";
@@ -89,6 +90,7 @@ function App() {
                 <Route path="/admin/dons" element={<AdminDashboard />} />
                 <Route path="/admin/affectations" element={<AdminDashboard />} />
                 <Route path="/admin/utilisateurs" element={<AdminUtilisateurs />} />
+                <Route path="/admin/actions-solidaires" element={<AdminActionsSolidaires />} />
               </Route>
             </Route>
 

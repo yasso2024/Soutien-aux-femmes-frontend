@@ -45,6 +45,15 @@ export async function participerAction(id) {
   }
 }
 
+export async function quitterAction(id) {
+  try {
+    const response = await axiosClient.put(`/actions-solidaires/${id}/quitter`);
+    return response;
+  } catch (error) {
+    throw new Error(error.response?.data?.message || error.message);
+  }
+}
+
 export async function changeActionStatus(id, statut) {
   try {
     const response = await axiosClient.put(`/actions-solidaires/${id}/statut`, { statut });

@@ -254,11 +254,21 @@ export default function AssociationDashboard() {
   }, [message]);
 
   const stats = useMemo(() => {
+    const getActionStatus = (action) => {
+      if (action?.statut && action.statut !== 'EN_ATTENTE') return action.statut;
+      if (!action?.dateAction) return 'EN_ATTENTE';
+      const actionDate = new Date(action.dateAction);
+      if (Number.isNaN(actionDate.getTime())) return 'EN_ATTENTE';
+      const endOfActionDay = new Date(actionDate);
+      endOfActionDay.setHours(23, 59, 59, 999);
+      return endOfActionDay < new Date() ? 'TERMINEE' : 'EN_ATTENTE';
+    };
+
     const totalActions = actions.length;
     const totalPropositions = propositions.length;
-    const actionsEnAttente = actions.filter((a) => (a?.statut || "EN_ATTENTE") === "EN_ATTENTE").length;
-    const actionsValidees = actions.filter((a) => a?.statut === "VALIDEE").length;
-    const actionsTerminees = actions.filter((a) => a?.statut === "TERMINEE").length;
+    const actionsEnAttente = actions.filter((a) => getActionStatus(a) === "EN_ATTENTE").length;
+    const actionsValidees = actions.filter((a) => getActionStatus(a) === "VALIDEE").length;
+    const actionsTerminees = actions.filter((a) => getActionStatus(a) === "TERMINEE").length;
 
     return [
       { label: "Actions solidaires", value: totalActions, icon: "📅", color: TEAL },

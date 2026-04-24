@@ -2,6 +2,7 @@ import { App as AntApp, Button, Form, Modal, Popconfirm, Select, Space, Table, T
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import {
+  changeAffectationStatus,
   confirmerParticipation,
   createAffectation,
   deleteAffectation,
@@ -16,6 +17,7 @@ const PURPLE = "#8B5CF6";
 const STATUT_LABELS = {
   EN_ATTENTE: "En attente",
   ACCEPTEE: "Acceptée",
+  REFUSEE: "Refusée",
   TERMINEE: "Terminée",
 };
 
@@ -69,6 +71,26 @@ const AffectationsList = () => {
       fetchData();
     } catch (error) {
       message.error(error.message || "Erreur lors de la suppression");
+    }
+  };
+
+  const handleRefuser = async (id) => {
+    try {
+      const response = await changeAffectationStatus(id, "REFUSEE");
+      message.success(response.data?.message || "Affectation refusée");
+      fetchData();
+    } catch (error) {
+      message.error(error.message || "Erreur lors du refus");
+    }
+  };
+
+  const handleTerminer = async (id) => {
+    try {
+      const response = await changeAffectationStatus(id, "TERMINEE");
+      message.success(response.data?.message || "Affectation terminée");
+      fetchData();
+    } catch (error) {
+      message.error(error.message || "Erreur lors de la clôture");
     }
   };
 
@@ -206,6 +228,7 @@ const AffectationsList = () => {
         const colorMap = {
           EN_ATTENTE: "orange",
           ACCEPTEE: "green",
+          REFUSEE: "red",
           TERMINEE: "blue",
         };
         return (
@@ -234,6 +257,42 @@ const AffectationsList = () => {
                 style={{ color: "#10B981", borderColor: "#10B981" }}
               >
                 Confirmer
+              </Button>
+            </Popconfirm>
+          )}
+
+          {(user?.role === "ADMINISTRATEUR" || user?.role === "BENEVOLE") &&
+            record.statut === "EN_ATTENTE" && (
+            <Popconfirm
+              title="Refuser cette affectation ?"
+              onConfirm={() => handleRefuser(record._id)}
+              okText="Oui"
+              cancelText="Non"
+            >
+              <Button
+                size="small"
+                icon={<CloseOutlined />}
+                style={{ color: "#EF4444", borderColor: "#EF4444" }}
+              >
+                Refuser
+              </Button>
+            </Popconfirm>
+          )}
+
+          {(user?.role === "ADMINISTRATEUR" || user?.role === "BENEVOLE") &&
+            record.statut === "ACCEPTEE" && (
+            <Popconfirm
+              title="Marquer cette affectation comme terminée ?"
+              onConfirm={() => handleTerminer(record._id)}
+              okText="Oui"
+              cancelText="Non"
+            >
+              <Button
+                size="small"
+                icon={<CheckOutlined />}
+                style={{ color: "#3B82F6", borderColor: "#3B82F6" }}
+              >
+                Terminer
               </Button>
             </Popconfirm>
           )}
